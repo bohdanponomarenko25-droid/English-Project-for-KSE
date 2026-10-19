@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSE CalmTest — Спокійний Шорт-Тест B2 з Кепчиком</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        calm: {
+                            bg: '#F4F7F4',
+                            card: '#FFFFFF',
+                            sage: '#E3ECE6',
+                            sageDark: '#4A7C66',
+                            mist: '#E8F0F8',
+                            kseBlue: '#1D4ED8',
+                            kseNavy: '#152C5B',
+                            kseOrange: '#F59E0B',
+                            lavender: '#EFEBF9',
+                            text: '#2C3A35',
+                            muted: '#64746E'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(145deg, #F3F7F4 0%, #EBF2F7 50%, #F5F2EB 100%);
+            color: #2C3A35;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Gentle floating animation for Kepchyk */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(1deg); }
+        }
+        .kepchyk-float {
+            animation: floatSlow 5s ease-in-out infinite;
+        }
+
+        /* Breathing circle animation */
+        @keyframes breathePulse {
+            0%, 100% { transform: scale(1); opacity: 0.75; }
+            50% { transform: scale(1.38); opacity: 1; }
+        }
+        .breathe-circle {
+            transition: transform 4s ease-in-out, background-color 4s ease-in-out;
+        }
+
+        /* Soft transitions */
+        .calm-transition {
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Custom soft focus ring */
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 124, 102, 0.22);
+            border-color: #4A7C66;
+        }
+
+        /* Subtle glass effect */
+        .calm-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F3F7F4;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C4D6CC;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #96B3A4;
+        }
+
+        /* Blink animation for Mascot eyes */
+        @keyframes blinkEyes {
+            0%, 94%, 98%, 100% { transform: scaleY(1); }
+            96% { transform: scaleY(0.08); }
+        }
+        .mascot-eyes {
+            transform-origin: center 115px;
+            animation: blinkEyes 6s infinite;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-emerald-100 selection:text-emerald-900">
+
+    <header class="sticky top-0 z-40 calm-glass border-b border-emerald-900/10 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+            <!-- Brand + KSE Logo Badge -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="handleNavClick('home')">
+                <div class="w-10 h-10 rounded-2xl bg-calm-kseNavy text-white flex flex-col items-center justify-center font-display font-extrabold shadow-sm leading-none">
+                    <span class="text-xs tracking-wider">KSE</span>
+                    <span class="text-[9px] font-normal text-sky-200 mt-0.5">PSYCH</span>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-display font-bold text-base sm:text-lg text-calm-kseNavy tracking-tight">CalmTest B2</h1>
+                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-medium">Без стресу 🌿</span>
+                    </div>
+                    <p class="text-xs text-calm-muted hidden sm:block">Простір спокійної підготовки та тестування для психологів</p>
+                </div>
+            </div>
+
+            <!-- Active Test Timer Bar (Shown only during test) -->
+            <div id="headerTimerContainer" class="hidden items-center gap-2 sm:gap-3 bg-white/90 border border-emerald-800/15 px-3.5 py-1.5 rounded-2xl shadow-sm">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" id="timerDot"></span>
+                    <span class="text-xs font-medium text-calm-muted">Час до автозакриття:</span>
+                    <span id="timerTextDisplay" class="font-mono font-bold text-base sm:text-lg text-calm-kseNavy">20:00</span>
+                </div>
+                <div class="w-20 sm:w-28 h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div id="timerProgressBar" class="h-full bg-emerald-500 calm-transition" style="width: 100%"></div>
+                </div>
+                <button onclick="toggleCalmTimerMode()" title="Приховати/показати секунди для зменшення тривожності" class="text-xs px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 calm-transition">
+                    <span id="calmTimerBtnLabel">🧘 Дзен-таймер</span>
+                </button>
+                <button onclick="fastForwardTimerDemo()" title="Демо: встановити таймер на 8 секунд, щоб перевірити автозакриття" class="text-xs px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 calm-transition">
+                    ⚡ Тест 8с
+                </button>
+            </div>
+
+            <!-- Right Utility Controls -->
+            <div class="flex items-center gap-2">
+                <!-- Ambient Audio Button -->
+                <button id="ambientSoundBtn" onclick="toggleAmbientSound()" class="flex items-center gap-1.5 text-xs sm:text-sm px-3 py-2 rounded-xl bg-white hover:bg-emerald-50 text-calm-text border border-emerald-900/10 shadow-sm calm-transition">
+                    <span id="ambientSoundIcon">🔇</span>
+                    <span class="hidden md:inline" id="ambientSoundLabel">Фоновий спокій</span>
+                </button>
+
+                <!-- Breathing Exercise Trigger -->
+                <button onclick="openBreathingModal()" class="flex items-center gap-1.5 text-xs sm:text-sm px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-medium shadow-sm calm-transition">
+                    <span>🫧</span>
+                    <span>Подихати з Кепчиком</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 pb-24">
+
+        <!-- ==================== VIEW 1: HOME / DASHBOARD ==================== -->
+        <section id="viewHome" class="space-y-8">
+            <!-- Hero Card with Kepchyk Mascot -->
+            <div class="relative rounded-3xl bg-gradient-to-br from-white via-white to-sky-50/90 border border-emerald-900/10 shadow-sm p-6 sm:p-8 lg:p-10 overflow-hidden">
+                <div class="absolute -right-16 -top-16 w-64 h-64 bg-amber-200/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-emerald-200/25 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+                    <!-- Left Column: Welcome & Psychological Reframing -->
+                    <div class="lg:col-span-7 space-y-5">
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100/80 text-calm-kseNavy text-xs font-semibold">
+                            <span>🐾 Кепчик — Маскот KSE поруч із тобою</span>
+                            <span>•</span>
+                            <span>English B2 Short Test</span>
+                        </div>
+
+                        <h2 class="font-display text-2xl sm:text-4xl font-extrabold text-calm-kseNavy leading-tight">
+                            Привіт, майбутній психологу! Давай пройдемо цей шорт-тест спокійно та впевнено.
+                        </h2>
+
+                        <p class="text-calm-muted text-sm sm:text-base leading-relaxed">
+                            Ми знаємо, як кортизол може заважати згадати потрібну форму <em>Passive Voice</em> чи <em>Reported Speech</em>. Тому цей простір створений за принципами <strong>низького когнітивного навантаження</strong>: м'які кольори, підтримка від Кепчика, можливість повторити конспект перед стартом і чіткий 20-хвилинний таймер без зайвого тиску.
+                        </p>
+
+                        <!-- Mascot Speech Bubble Quote -->
+                        <div class="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200/70 flex items-start gap-3">
+                            <span class="text-xl mt-0.5">💙</span>
+                            <div class="text-xs sm:text-sm text-emerald-950 leading-relaxed">
+                                <strong class="font-semibold">Порада від Кепчика:</strong>
+                                <span id="homeMascotQuote">«Когнітивна переоцінка допомагає: сприймай ці 20 хвилин не як іспит, а як безпечний тренажер для нейронів. Навіть якщо щось забудеш — після завершення часу я одразу покажу тобі ключі та пояснення!»</span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Navigation Tabs -->
+                        <div class="flex flex-wrap gap-3 pt-1">
+                            <button onclick="scrollToElement('setupTestCard')" class="px-5 py-3 rounded-2xl bg-calm-kseNavy hover:bg-blue-900 text-white font-semibold text-sm shadow-sm calm-transition flex items-center gap-2">
+                                <span>✍️ Перейти до вибору варіанту (20 хв)</span>
+                            </button>
+                            <button onclick="switchMainTab('prep')" class="px-5 py-3 rounded-2xl bg-white hover:bg-emerald-50 text-calm-text border border-emerald-900/15 font-semibold text-sm shadow-sm calm-transition flex items-center gap-2">
+                                <span>📖 Відкрити конспект і картки B2</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Interactive Kepchyk KSE Mascot Card -->
+                    <div class="lg:col-span-5 flex flex-col items-center">
+                        <div class="relative w-full max-w-xs rounded-3xl bg-gradient-to-b from-amber-400 via-orange-400 to-amber-500 p-5 shadow-md border-4 border-white text-center">
+                            <!-- KSE Header inside Mascot Poster Card (inspired by uploaded photo) -->
+                            <div class="flex items-center justify-between text-white/95 mb-2 px-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-display font-black text-xl tracking-tight">KSE</span>
+                                    <span class="h-5 w-px bg-white/60"></span>
+                                    <span class="text-[9px] text-left leading-tight font-medium opacity-95">Kyiv<br>School of<br>Economics</span>
+                                </div>
+                                <span class="text-[11px] bg-white/25 backdrop-blur-sm px-2.5 py-0.5 rounded-full font-semibold">Твій бадді 🐾</span>
+                            </div>
+
+                            <!-- SVG Illustration of Kepchyk (Blue-and-white Lynx in KSE Cap & Hoodie) -->
+                            <div class="w-48 h-52 mx-auto kepchyk-float cursor-pointer select-none" onclick="petKepchyk()" title="Натисни, щоб дати п'ять Кепчику!">
+                                <svg viewBox="0 0 240 260" class="w-full h-full drop-shadow-lg" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Left & Right Lynx Ears with dark blue tufts -->
+                                    <g id="kepchykEars">
+                                        <!-- Left Ear -->
+                                        <path d="M52 78 L34 18 L86 52 Z" fill="#1E3A8A" stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"/>
+                                        <path d="M34 18 L26 5 L42 15 L38 7 L46 20 Z" fill="#0F172A"/>
+                                        <path d="M56 72 L44 32 L78 54 Z" fill="#E2E8F0"/>
+                                        <!-- Right Ear -->
+                                        <path d="M188 78 L206 18 L154 52 Z" fill="#1E3A8A" stroke="#0F172A" stroke-width="2.5" stroke-linejoin="round"/>
+                                        <path d="M206 18 L214 5 L198 15 L202 7 L194 20 Z" fill="#0F172A"/>
+                                        <path d="M184 72 L196 32 L162 54 Z" fill="#E2E8F0"/>
+                                    </g>
+
+                                    <!-- Hoodie Body -->
+                                    <path d="M58 175 C52 195, 48 230, 50 252 L190 252 C192 230, 188 195, 182 175 C165 162, 75 162, 58 175 Z" fill="#1D4ED8" stroke="#1E3A8A" stroke-width="3"/>
+                                    <!-- Hoodie Collar / Hood folds -->
+                                    <path d="M68 168 Q120 192 172 168" fill="none" stroke="#1E40AF" stroke-width="6" stroke-linecap="round"/>
+                                    <!-- Hoodie Pocket -->
+                                    <path d="M82 225 L92 208 L148 208 L158 225 L158 248 L82 248 Z" fill="#1E40AF" stroke="#172554" stroke-width="2"/>
+                                    <!-- Hoodie Drawstrings -->
+                                    <path d="M106 180 Q104 202 106 212" fill="none" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round"/>
+                                    <path d="M134 180 Q136 202 134 212" fill="none" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round"/>
+                                    <!-- KSE Text on Hoodie -->
+                                    <text x="120" y="203" text-anchor="middle" fill="#F8FAFC" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="21" letter-spacing="1.5">KSE</text>
+
+                                    <!-- Lynx Fluffy Cheeks / Head Base -->
+                                    <path d="M48 118 L34 126 L46 136 L36 146 L54 152 C72 172, 168 172, 186 152 L204 146 L194 136 L206 126 L192 118 C196 86, 170 60, 120 60 C70 60, 44 86, 48 118 Z" fill="#F1F5F9" stroke="#1E3A8A" stroke-width="2.5"/>
+
+                                    <!-- Blue Lynx Fur Stripes on Cheeks -->
+                                    <path d="M48 122 Q65 120 76 128" fill="none" stroke="#1D4ED8" stroke-width="4" stroke-linecap="round"/>
+                                    <path d="M45 135 Q64 134 78 142" fill="none" stroke="#1E3A8A" stroke-width="3.5" stroke-linecap="round"/>
+                                    <path d="M192 122 Q175 120 164 128" fill="none" stroke="#1D4ED8" stroke-width="4" stroke-linecap="round"/>
+                                    <path d="M195 135 Q176 134 162 142" fill="none" stroke="#1E3A8A" stroke-width="3.5" stroke-linecap="round"/>
+
+                                    <!-- Forehead Fur Markings -->
+                                    <path d="M106 78 L112 98" stroke="#1E3A8A" stroke-width="3.5" stroke-linecap="round"/>
+                                    <path d="M134 78 L128 98" stroke="#1E3A8A" stroke-width="3.5" stroke-linecap="round"/>
+                                    <path d="M120 75 L120 95" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+
+                                    <!-- Expressive Big Blue Eyes -->
+                                    <g class="mascot-eyes">
+                                        <!-- Left Eye -->
+                                        <ellipse cx="92" cy="115" rx="15" ry="16" fill="#FFFFFF" stroke="#0F172A" stroke-width="2.5"/>
+                                        <circle cx="94" cy="115" r="10.5" fill="#2563EB"/>
+                                        <circle cx="94" cy="115" r="6" fill="#0F172A"/>
+                                        <circle cx="90" cy="110" r="3.5" fill="#FFFFFF"/>
+                                        <circle cx="98" cy="119" r="1.8" fill="#FFFFFF"/>
+                                        <!-- Right Eye -->
+                                        <ellipse cx="148" cy="115" rx="15" ry="16" fill="#FFFFFF" stroke="#0F172A" stroke-width="2.5"/>
+                                        <circle cx="146" cy="115" r="10.5" fill="#2563EB"/>
+                                        <circle cx="146" cy="115" r="6" fill="#0F172A"/>
+                                        <circle cx="142" cy="110" r="3.5" fill="#FFFFFF"/>
+                                        <circle cx="150" cy="119" r="1.8" fill="#FFFFFF"/>
+                                    </g>
+
+                                    <!-- Cute Muzzle, Nose & Whisker Dots -->
+                                    <ellipse cx="120" cy="138" rx="28" ry="18" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+                                    <!-- Dark Blue/Black Lynx Nose -->
+                                    <path d="M111 128 Q120 124 129 128 L120 138 Z" fill="#0F172A"/>
+                                    <!-- Gentle Reassuring Smile -->
+                                    <path d="M120 138 L120 144" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round"/>
+                                    <path d="M104 143 Q112 151 120 144 Q128 151 136 143" fill="none" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round"/>
+                                    <!-- Whisker spots -->
+                                    <circle cx="102" cy="137" r="1.5" fill="#334155"/>
+                                    <circle cx="97" cy="141" r="1.5" fill="#334155"/>
+                                    <circle cx="105" cy="142" r="1.5" fill="#334155"/>
+                                    <circle cx="138" cy="137" r="1.5" fill="#334155"/>
+                                    <circle cx="143" cy="141" r="1.5" fill="#334155"/>
+                                    <circle cx="135" cy="142" r="1.5" fill="#334155"/>
+
+                                    <!-- White KSE Baseball Cap -->
+                                    <path d="M58 84 C62 42, 178 42, 182 84 Z" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2.5"/>
+                                    <!-- Cap Visor / Brim -->
+                                    <path d="M52 84 Q120 65 188 84 Q192 94 176 95 Q120 79 64 95 Q48 94 52 84 Z" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2.5"/>
+                                    <!-- KSE lettering on Cap -->
+                                    <text x="120" y="71" text-anchor="middle" fill="#1E3A8A" font-family="Plus Jakarta Sans, sans-serif" font-weight="900" font-size="22" letter-spacing="1">KSE</text>
+                                </svg>
+                            </div>
+
+                            <!-- Poster Title Matching Uploaded Image -->
+                            <div class="mt-1 text-left px-2">
+                                <div class="font-display font-black text-white text-xl leading-none tracking-wide drop-shadow-sm">КЕПЧИК —</div>
+                                <div class="font-display font-black text-white text-xl leading-tight tracking-wide drop-shadow-sm">МАСКОТ KSE</div>
+                            </div>
+                            <button onclick="petKepchyk()" class="mt-2 w-full py-1.5 rounded-xl bg-white/95 hover:bg-white text-calm-kseNavy font-semibold text-xs shadow-sm calm-transition">
+                                👋 Натисни, щоб отримати підтримку
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode Switcher: Test Setup vs Study Guide -->
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-emerald-900/10 pb-3">
+                <div class="flex gap-2">
+                    <button id="tabBtnTestSetup" onclick="switchMainTab('setup')" class="px-5 py-2.5 rounded-2xl font-display font-bold text-sm bg-calm-kseNavy text-white shadow-sm calm-transition">
+                        🎯 Шорт-тест (20 хвилин)
+                    </button>
+                    <button id="tabBtnPrepGuide" onclick="switchMainTab('prep')" class="px-5 py-2.5 rounded-2xl font-display font-bold text-sm bg-white text-calm-text hover:bg-emerald-50 border border-emerald-900/10 calm-transition">
+                        📚 База підготовки B2 (Довідник + Картки)
+                    </button>
+                </div>
+                <div class="text-xs text-calm-muted flex items-center gap-2">
+                    <span>⏱️ Автоматичне закриття рівно через 20:00</span>
+                    <span>•</span>
+                    <span>⭐ Максимум: 6.0 балів</span>
+                </div>
+            </div>
+
+            <!-- SUBVIEW 1A: TEST SETUP & VARIANT SELECTION -->
+            <div id="subviewTestSetup" class="space-y-6">
+                <div id="setupTestCard" class="bg-white rounded-3xl border border-emerald-900/10 shadow-sm p-6 sm:p-8 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                        <div>
+                            <h3 class="font-display text-xl font-bold text-calm-kseNavy">Налаштування перед стартом тесту</h3>
+                            <p class="text-sm text-calm-muted mt-0.5">Заповни свої дані та обери рівень складності. Після натискання «Почати тест» запуститься таймер на 20 хвилин.</p>
+                        </div>
+                        <div class="px-3.5 py-2 rounded-2xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs font-medium flex items-center gap-2 self-start">
+                            <span>🔔</span>
+                            <span>Коли 20 хвилин спливають, тест закривається автоматично</span>
+                        </div>
+                    </div>
+
+                    <!-- Student Info Form -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-calm-text mb-1.5">ПІБ студента / студентки</label>
+                            <input type="text" id="studentNameInput" placeholder="Напр.: Коваленко Марія" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/60 text-sm text-calm-text">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-calm-text mb-1.5">Група / Потік (Психологія)</label>
+                            <input type="text" id="studentGroupInput" placeholder="Напр.: PSY-26 / Група B2" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/60 text-sm text-calm-text">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-calm-text mb-1.5">Як ти почуваєшся зараз?</label>
+                            <select id="studentMoodSelect" onchange="handleMoodChange(this.value)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/60 text-sm text-calm-text">
+                                <option value="calm">🌿 Спокійно, готовий(-а) до практики</option>
+                                <option value="nervous">🫧 Трохи хвилююся перед тестом</option>
+                                <option value="tired">☕ Втомлений(-а), хочу пройти у своєму темпі</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Mood Feedback Banner -->
+                    <div id="moodFeedbackBox" class="hidden p-4 rounded-2xl bg-sky-50 border border-sky-200 text-xs sm:text-sm text-sky-950 flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">🐾</span>
+                            <span id="moodFeedbackText">Кепчик рекомендує зробити 3 глибоких вдихи перед стартом.</span>
+                        </div>
+                        <button onclick="openBreathingModal()" class="shrink-0 px-3 py-1.5 rounded-xl bg-sky-700 text-white text-xs font-semibold hover:bg-sky-800 calm-transition">
+                            Дихальна вправа (30 с)
+                        </button>
+                    </div>
+
+                    <!-- 3 Variants Selection Cards -->
+                    <div>
+                        <label class="block text-xs font-semibold text-calm-text mb-3 uppercase tracking-wider">Обери свій варіант тесту (з офіційного пакету B2 English Practice Tests):</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Variant 1 -->
+                            <div id="variantCard1" onclick="selectVariant(1)" class="cursor-pointer rounded-2xl p-5 border-2 border-calm-sageDark bg-emerald-50/40 calm-transition relative flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-3">
+                                        <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 font-bold text-xs">ВАРІАНТ 1</span>
+                                        <span class="text-xs font-semibold text-emerald-800">Рівень 1: Базовий</span>
+                                    </div>
+                                    <h4 class="font-display font-bold text-base text-calm-kseNavy mb-1">FOUNDATION B2 (Easy)</h4>
+                                    <p class="text-xs text-calm-muted leading-relaxed mb-4">
+                                        Базові часи Passive Voice (Present/Past/Future Simple, Modal, Present Continuous/Perfect), пряма мова та лексика <em>Gap Year & Cover Letter</em>.
+                                    </p>
+                                </div>
+                                <div class="pt-3 border-t border-emerald-900/10 flex items-center justify-between text-xs font-medium text-calm-text">
+                                    <span>⏱️ 20 хвилин</span>
+                                    <span>⭐ Макс: 6.0 балів</span>
+                                </div>
+                            </div>
+
+                            <!-- Variant 2 -->
+                            <div id="variantCard2" onclick="selectVariant(2)" class="cursor-pointer rounded-2xl p-5 border-2 border-slate-200 hover:border-emerald-600/50 bg-white calm-transition relative flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-3">
+                                        <span class="px-2.5 py-1 rounded-lg bg-sky-100 text-sky-900 font-bold text-xs">ВАРІАНТ 2</span>
+                                        <span class="text-xs font-semibold text-sky-800">Рівень 2: Середній</span>
+                                    </div>
+                                    <h4 class="font-display font-bold text-base text-calm-kseNavy mb-1">STANDARD B2 (Medium)</h4>
+                                    <p class="text-xs text-calm-muted leading-relaxed mb-4">
+                                        Continuous, Perfect, Modal та Impersonal Passive; непряма мова зі спецпитаннями; лексика <em>CSR, Sustainability & Business Ethics</em>.
+                                    </p>
+                                </div>
+                                <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-medium text-calm-text">
+                                    <span>⏱️ 20 хвилин</span>
+                                    <span>⭐ Макс: 6.0 балів</span>
+                                </div>
+                            </div>
+
+                            <!-- Variant 3 -->
+                            <div id="variantCard3" onclick="selectVariant(3)" class="cursor-pointer rounded-2xl p-5 border-2 border-slate-200 hover:border-emerald-600/50 bg-white calm-transition relative flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-3">
+                                        <span class="px-2.5 py-1 rounded-lg bg-purple-100 text-purple-900 font-bold text-xs">ВАРІАНТ 3</span>
+                                        <span class="text-xs font-semibold text-purple-800">Рівень 3: Високий</span>
+                                    </div>
+                                    <h4 class="font-display font-bold text-base text-calm-kseNavy mb-1">ADVANCED B2+ (High)</h4>
+                                    <p class="text-xs text-calm-muted leading-relaxed mb-4">
+                                        Modal Perfect, Future Perfect, подвійний додаток, заміна Perfect Continuous; накази в Reported Speech; <em>Presentations & Visuals</em>.
+                                    </p>
+                                </div>
+                                <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-medium text-calm-text">
+                                    <span>⏱️ 20 хвилин</span>
+                                    <span>⭐ Макс: 6.0 балів</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Structure Summary & Start Button -->
+                    <div class="bg-calm-bg rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border border-emerald-900/10">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto text-xs">
+                            <div class="bg-white p-3 rounded-xl border border-slate-200/70">
+                                <div class="font-bold text-calm-kseNavy">Завдання 1</div>
+                                <div class="text-calm-muted">Passive Voice (1.5 б)</div>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-slate-200/70">
+                                <div class="font-bold text-calm-kseNavy">Завдання 2</div>
+                                <div class="text-calm-muted">Reported Speech (1.5 б)</div>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-slate-200/70">
+                                <div class="font-bold text-calm-kseNavy">Завдання 3</div>
+                                <div class="text-calm-muted">Vocabulary Context (1.5 б)</div>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-slate-200/70">
+                                <div class="font-bold text-calm-kseNavy">Завдання 4</div>
+                                <div class="text-calm-muted">Word by Definition (1.5 б)</div>
+                            </div>
+                        </div>
+
+                        <button onclick="startTestSession()" class="w-full lg:w-auto px-8 py-4 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-display font-bold text-base shadow-md hover:shadow-lg calm-transition flex items-center justify-center gap-2.5 shrink-0">
+                            <span>🚀 Почати 20-хвилинний тест</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUBVIEW 1B: PREPARATION GUIDE & FLASHCARDS -->
+            <div id="subviewPrepGuide" class="hidden space-y-6">
+                <div class="bg-white rounded-3xl border border-emerald-900/10 shadow-sm p-6 sm:p-8 space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Повний довідник перед тестом</span>
+                            <h3 class="font-display text-xl sm:text-2xl font-bold text-calm-kseNavy mt-0.5">Підготовка до тесту з англійської мови (Рівень B2)</h3>
+                            <p class="text-sm text-calm-muted">Повтори лексичний мінімум або потренуйся на інтерактивних картках з Кепчиком без обмеження часу.</p>
+                        </div>
+                        <button onclick="switchMainTab('setup')" class="self-start px-4 py-2.5 rounded-xl bg-calm-kseNavy text-white text-xs font-semibold hover:bg-blue-900 calm-transition">
+                            ✍️ Я готовий(-а) — перейти до тесту
+                        </button>
+                    </div>
+
+                    <!-- Interactive Flashcard Trainer -->
+                    <div class="rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/60 to-sky-50 border border-emerald-200/80 p-5 sm:p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg">🃏</span>
+                                <h4 class="font-display font-bold text-sm sm:text-base text-calm-kseNavy">Інтерактивні флеш-картки для швидкого повторення</h4>
+                            </div>
+                            <span id="flashcardCounter" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-white text-emerald-800 border border-emerald-200">1 / 18</span>
+                        </div>
+
+                        <div onclick="flipFlashcard()" class="cursor-pointer bg-white rounded-2xl p-6 sm:p-8 border border-emerald-900/10 shadow-sm text-center min-h-[160px] flex flex-col items-center justify-center calm-transition hover:border-emerald-500">
+                            <span id="flashcardCategory" class="text-[11px] uppercase tracking-wider font-semibold text-emerald-700 mb-2">Модуль 1 • Кар'єра</span>
+                            <div id="flashcardFront" class="font-display font-bold text-xl sm:text-2xl text-calm-kseNavy">to do smth tangible</div>
+                            <div id="flashcardBack" class="hidden space-y-1.5 mt-2">
+                                <div class="text-base sm:text-lg font-semibold text-emerald-800">to do something important and noticeable</div>
+                                <div class="text-sm text-calm-muted">Українською: <strong>робити щось відчутне / суттєве</strong></div>
+                            </div>
+                            <span class="text-[11px] text-slate-400 mt-4">Натисни на картку, щоб перевернути ↻</span>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3 mt-4">
+                            <button onclick="prevFlashcard()" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-calm-text border border-slate-200 text-xs font-semibold calm-transition">
+                                ← Попереднє слово
+                            </button>
+                            <button onclick="flipFlashcard()" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold calm-transition">
+                                Показати значення / переклад
+                            </button>
+                            <button onclick="nextFlashcard()" class="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-calm-text border border-slate-200 text-xs font-semibold calm-transition">
+                                Наступне слово →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Guide Sub-tabs -->
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        <button onclick="showGuideSection('vocab')" id="guideBtnVocab" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-700 text-white calm-transition">
+                            1–3. Лексичний мінімум (Таблиці + Пошук)
+                        </button>
+                        <button onclick="showGuideSection('passive')" id="guideBtnPassive" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 calm-transition">
+                            4. Граматика: Passive Voice
+                        </button>
+                        <button onclick="showGuideSection('reported')" id="guideBtnReported" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 calm-transition">
+                            5. Граматика: Reported Speech
+                        </button>
+                    </div>
+
+                    <!-- Guide Section 1-3: Vocabulary Search & Table -->
+                    <div id="guideSecVocab" class="space-y-4">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="vocabSearchInput" oninput="filterVocabTable()" placeholder="🔍 Швидкий пошук слова, англійського визначення або перекладу..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm">
+                        </div>
+                        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                                <thead class="bg-slate-50 text-calm-kseNavy border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3.5 font-bold">Слово / Вираз</th>
+                                        <th class="p-3.5 font-bold">Значення (English Definition)</th>
+                                        <th class="p-3.5 font-bold">Переклад</th>
+                                        <th class="p-3.5 font-bold">Модуль</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vocabTableBody" class="divide-y divide-slate-100">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Guide Section 4: Passive Voice Reference -->
+                    <div id="guideSecPassive" class="hidden space-y-4">
+                        <div class="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-xs sm:text-sm text-sky-950 space-y-1">
+                            <div><strong>Формула пасивного стану:</strong> <code>Subject + to be (у потрібному часі) + Past Participle (V3 / -ed)</code></div>
+                            <div>Виконавець вказується прийменником <strong>by</strong>, інструмент чи матеріал — <strong>with</strong>.</div>
+                        </div>
+                        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                                <thead class="bg-slate-50 text-calm-kseNavy border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3.5 font-bold">Tense (Час)</th>
+                                        <th class="p-3.5 font-bold">Структура Passive</th>
+                                        <th class="p-3.5 font-bold">Практичний приклад (Active → Passive)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr><td class="p-3 font-semibold">Present Simple</td><td class="p-3 font-mono text-emerald-800">am / is / are + V3</td><td class="p-3">We maintain fair prices. → <strong>Fair prices are maintained.</strong></td></tr>
+                                    <tr><td class="p-3 font-semibold">Present Continuous</td><td class="p-3 font-mono text-emerald-800">am / is / are + being + V3</td><td class="p-3">They are reviewing the application. → <strong>The application is being reviewed.</strong></td></tr>
+                                    <tr><td class="p-3 font-semibold">Past Simple</td><td class="p-3 font-mono text-emerald-800">was / were + V3</td><td class="p-3">The manager signed the agreement. → <strong>The agreement was signed.</strong></td></tr>
+                                    <tr><td class="p-3 font-semibold">Past Continuous</td><td class="p-3 font-mono text-emerald-800">was / were + being + V3</td><td class="p-3">They were discussing the agenda. → <strong>The agenda was being discussed.</strong></td></tr>
+                                    <tr><td class="p-3 font-semibold">Present Perfect</td><td class="p-3 font-mono text-emerald-800">have / has + been + V3</td><td class="p-3">We have captured market share. → <strong>Market share has been captured.</strong></td></tr>
+                                    <tr><td class="p-3 font-semibold">Past Perfect</td><td class="p-3 font-mono text-emerald-800">had + been + V3</td><td class="p-3">The firm had reached the settlement. → <strong>The settlement had been reached.</strong></td></tr>
+                                    <tr><td class="p-3 font-semibold">Future Simple</td><td class="p-3 font-mono text-emerald-800">will be + V3</td><td class="p-3">The board will uphold the standards. → <strong>Standards will be upheld.</strong></td></tr>
+                                    <tr><td class="p-3 font-semibold">Future Perfect</td><td class="p-3 font-mono text-emerald-800">will have been + V3</td><td class="p-3">By May they will have built it. → <strong>It will have been built by May.</strong></td></tr>
+                                    <tr><td class="p-3 font-semibold">Modal Verbs</td><td class="p-3 font-mono text-emerald-800">modal + be + V3</td><td class="p-3">You must obey the law. → <strong>The law must be obeyed.</strong></td></tr>
+                                    <tr><td class="p-3 font-semibold">Modal Perfect</td><td class="p-3 font-mono text-emerald-800">modal + have been + V3</td><td class="p-3">He should have informed us. → <strong>We should have been informed.</strong></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-xs sm:text-sm space-y-1.5 text-amber-950">
+                            <div class="font-bold">Важливі винятки та особливості B2:</div>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong>Perfect Continuous (Present/Past/Future)</strong> не вживаються у пасивному стані — замість них використовують <strong>Simple Perfect</strong> (напр., <em>has been investigated for three weeks</em>).</li>
+                                <li><strong>Дієслова з двома додатками (give, send, offer, tell):</strong> підметом стає особа: <em>The best participant was offered a managerial position.</em></li>
+                                <li><strong>Безособовий пасив (Impersonal Passive):</strong> в офіційних звітах: <em>It is acknowledged that sustainability is vital.</em></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Guide Section 5: Reported Speech Reference -->
+                    <div id="guideSecReported" class="hidden space-y-4">
+                        <div class="p-4 rounded-2xl bg-purple-50 border border-purple-200 text-xs sm:text-sm text-purple-950">
+                            <strong>Правило узгодження часів (Backshift):</strong> якщо головне речення стоїть у минулому часі (<em>said, stated, told, asked, noted, promised, warned</em>), дієслово прямої мови робить «крок назад» у часі. У спеціальних питаннях зберігається <strong>прямий порядок слів</strong>!
+                        </div>
+                        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                                <thead class="bg-slate-50 text-calm-kseNavy border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3.5 font-bold">Пряма мова (Direct)</th>
+                                        <th class="p-3.5 font-bold">Непряма мова (Reported)</th>
+                                        <th class="p-3.5 font-bold">Приклад трансформації</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr><td class="p-3 font-semibold">Present Simple</td><td class="p-3 text-purple-900 font-semibold">Past Simple</td><td class="p-3">"I strive for excellence," she said. → She said she <strong>strove / strived</strong> for excellence.</td></tr>
+                                    <tr><td class="p-3 font-semibold">Present Continuous</td><td class="p-3 text-purple-900 font-semibold">Past Continuous</td><td class="p-3">"We are stepping back," he said. → He said they <strong>were stepping back</strong>.</td></tr>
+                                    <tr><td class="p-3 font-semibold">Past Simple</td><td class="p-3 text-purple-900 font-semibold">Past Perfect</td><td class="p-3">"They broke sales records," she noted. → She noted they <strong>had broken</strong> sales records.</td></tr>
+                                    <tr><td class="p-3 font-semibold">Past Continuous</td><td class="p-3 text-purple-900 font-semibold">Past Perfect Continuous</td><td class="p-3">"I was writing a cover letter," he said. → He said he <strong>had been writing</strong> a cover letter.</td></tr>
+                                    <tr><td class="p-3 font-semibold">Present Perfect</td><td class="p-3 text-purple-900 font-semibold">Past Perfect</td><td class="p-3">"We have cut carbon footprint," he added. → He added they <strong>had cut</strong> carbon footprint.</td></tr>
+                                    <tr><td class="p-3 font-semibold">Future Simple (will)</td><td class="p-3 text-purple-900 font-semibold">Conditional (would)</td><td class="p-3">"We will stick to the agenda," he promised. → He promised they <strong>would stick</strong> to it.</td></tr>
+                                    <tr><td class="p-3 font-semibold">can / may / must</td><td class="p-3 text-purple-900 font-semibold">could / might / had to</td><td class="p-3">"You must obey the law," she warned. → She warned that they <strong>had to obey</strong> the law.</td></tr>
+                                    <tr><td class="p-3 font-semibold">Маркери часу й місця</td><td class="p-3 text-purple-900 font-semibold">Зміна вказівних слів</td><td class="p-3">tomorrow → <strong>the next/following day</strong> | last year → <strong>the year before / previous year</strong> | this → <strong>that</strong> | here → <strong>there</strong></td></tr>
+                                    <tr><td class="p-3 font-semibold">Загальні та спецпитання</td><td class="p-3 text-purple-900 font-semibold">if/whether + прямий порядок</td><td class="p-3">"Why did you sidetrack the debate?" → He asked him <strong>why he had sidetracked</strong> the debate.</td></tr>
+                                    <tr><td class="p-3 font-semibold">Накази (Imperatives)</td><td class="p-3 text-purple-900 font-semibold">to V / not to V</td><td class="p-3">"Submit promptly and do not sidetrack!" → Told me <strong>to submit promptly and not to sidetrack</strong>.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 2: ACTIVE 20-MINUTE SHORT TEST ==================== -->
+        <section id="viewActiveTest" class="hidden space-y-6">
+            <!-- Top Test Info Banner + Mascot Reassurance -->
+            <div class="bg-white rounded-3xl border border-emerald-900/10 shadow-sm p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span id="activeVariantBadge" class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 font-bold text-xs">ВАРІАНТ 1 • FOUNDATION B2</span>
+                        <span id="activeStudentBadge" class="text-xs text-calm-muted font-medium">Студент: —</span>
+                    </div>
+                    <h2 id="activeTestTitle" class="font-display text-lg sm:text-xl font-bold text-calm-kseNavy">Шорт-тест з англійської мови (Макс. бал: 6.0)</h2>
+                </div>
+
+                <!-- Kepchyk Mini Companion Widget -->
+                <div class="flex items-center gap-3 bg-emerald-50/80 border border-emerald-200/80 px-4 py-2.5 rounded-2xl max-w-md">
+                    <div class="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center shrink-0 text-lg shadow-sm font-bold">
+                        🐾
+                    </div>
+                    <div class="text-xs text-emerald-950 leading-snug">
+                        <span class="font-bold text-calm-kseNavy">Кепчик шепоче:</span>
+                        <span id="testCompanionTip">«Рухайся у комфортному темпі. Якщо якесь речення здається складним — перейди до наступного й повернешся пізніше!»</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Steps Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <a href="#taskBlock1" class="bg-white hover:bg-emerald-50/60 p-3 rounded-2xl border border-emerald-900/10 flex items-center justify-between text-xs font-semibold text-calm-kseNavy calm-transition">
+                    <span>1. Passive Voice</span>
+                    <span class="text-emerald-700">1.5 б</span>
+                </a>
+                <a href="#taskBlock2" class="bg-white hover:bg-emerald-50/60 p-3 rounded-2xl border border-emerald-900/10 flex items-center justify-between text-xs font-semibold text-calm-kseNavy calm-transition">
+                    <span>2. Reported Speech</span>
+                    <span class="text-emerald-700">1.5 б</span>
+                </a>
+                <a href="#taskBlock3" class="bg-white hover:bg-emerald-50/60 p-3 rounded-2xl border border-emerald-900/10 flex items-center justify-between text-xs font-semibold text-calm-kseNavy calm-transition">
+                    <span>3. Vocabulary</span>
+                    <span class="text-emerald-700">1.5 б</span>
+                </a>
+                <a href="#taskBlock4" class="bg-white hover:bg-emerald-50/60 p-3 rounded-2xl border border-emerald-900/10 flex items-center justify-between text-xs font-semibold text-calm-kseNavy calm-transition">
+                    <span>4. Definitions</span>
+                    <span class="text-emerald-700">1.5 б</span>
+                </a>
+            </div>
+
+            <!-- TASK 1: PASSIVE VOICE -->
+            <div id="taskBlock1" class="bg-white rounded-3xl border border-emerald-900/10 shadow-sm p-6 sm:p-8 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Завдання 1 • 6 речень × 0.25 бала</span>
+                        <h3 class="font-display text-lg font-bold text-calm-kseNavy">PASSIVE VOICE (Пасивний стан)</h3>
+                        <p id="task1Instruction" class="text-xs sm:text-sm text-calm-muted mt-0.5">Розкрийте дужки, поставивши дієслово у правильну часову форму Passive Voice.</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs">1.5 бала</span>
+                </div>
+                <div id="task1QuestionsContainer" class="space-y-4">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- TASK 2: REPORTED SPEECH -->
+            <div id="taskBlock2" class="bg-white rounded-3xl border border-emerald-900/10 shadow-sm p-6 sm:p-8 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Завдання 2 • 3 речення × 0.5 бала</span>
+                        <h3 class="font-display text-lg font-bold text-calm-kseNavy">REPORTED SPEECH (Непряма мова)</h3>
+                        <p id="task2Instruction" class="text-xs sm:text-sm text-calm-muted mt-0.5">Трансформуйте речення з прямої мови у Reported Speech (дотримуйтесь узгодження часів).</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs">1.5 бала</span>
+                </div>
+                <div id="task2QuestionsContainer" class="space-y-5">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- TASK 3: VOCABULARY IN CONTEXT -->
+            <div id="taskBlock3" class="bg-white rounded-3xl border border-emerald-900/10 shadow-sm p-6 sm:p-8 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Завдання 3 • 6 слів × 0.25 бала</span>
+                        <h3 class="font-display text-lg font-bold text-calm-kseNavy">VOCABULARY IN CONTEXT (Слова за контекстом)</h3>
+                        <p class="text-xs sm:text-sm text-calm-muted mt-0.5">Оберіть правильне слово або вираз зі списку для кожного пропуску в тексті.</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs">1.5 бала</span>
+                </div>
+
+                <!-- Word Bank Pills -->
+                <div class="p-4 rounded-2xl bg-calm-bg border border-emerald-900/10">
+                    <div class="text-xs font-semibold text-calm-muted mb-2">Слова для довідки (Word Bank):</div>
+                    <div id="task3WordBank" class="flex flex-wrap gap-2">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Context Text with Inline Dropdowns -->
+                <div id="task3ContextParagraph" class="text-sm sm:text-base leading-loose text-calm-text bg-slate-50/70 p-5 rounded-2xl border border-slate-200/80">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- TASK 4: WORD BY DEFINITION -->
+            <div id="taskBlock4" class="bg-white rounded-3xl border border-emerald-900/10 shadow-sm p-6 sm:p-8 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Завдання 4 • 6 слів × 0.25 бала</span>
+                        <h3 class="font-display text-lg font-bold text-calm-kseNavy">WORD BY DEFINITION (Слово за англійським поясненням)</h3>
+                        <p class="text-xs sm:text-sm text-calm-muted mt-0.5">Навпроти кожного пояснення англійською впишіть слово або вираз із вокабуляру, що починається на підказану першу літеру (можна вписувати повністю слово).</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs">1.5 бала</span>
+                </div>
+                <div id="task4QuestionsContainer" class="space-y-3.5">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Submit Footer Bar -->
+            <div class="bg-white rounded-3xl border border-emerald-900/15 shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 text-xs sm:text-sm text-calm-muted">
+                    <span class="text-xl">🌿</span>
+                    <span>Перевір свої відповіді. Якщо час (20 хвилин) закінчиться раніше, система сама збереже все й покаже результат.</span>
+                </div>
+                <button onclick="finishTest('manual')" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-calm-kseNavy hover:bg-blue-900 text-white font-display font-bold text-sm sm:text-base shadow-md calm-transition shrink-0">
+                    ✅ Завершити тест і переглянути результат
+                </button>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 3: RESULTS & FEEDBACK SCREEN ==================== -->
+        <section id="viewResults" class="hidden space-y-6">
+            <!-- Auto-closed Notification Banner (shown if closed by timer) -->
+            <div id="autoClosedNotice" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-950 flex items-center gap-3 shadow-sm">
+                <span class="text-2xl">⏰</span>
+                <div class="text-xs sm:text-sm">
+                    <strong class="font-bold">Час тесту (20 хвилин) вичерпано!</strong> Тест було автоматично закрито, а всі введені тобою відповіді дбайливо збережено та перевірено.
+                </div>
+            </div>
+
+            <!-- Main Score Summary Card with Kepchyk -->
+            <div class="bg-white rounded-3xl border border-emerald-900/10 shadow-sm p-6 sm:p-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <div class="lg:col-span-8 space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold">
+                            <span id="resultCompletionBadge">🎉 Тест успішно завершено</span>
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-calm-kseNavy" id="resultHeadline">
+                            Чудова робота! Ось твій спокійний розбір результатів
+                        </h2>
+                        <p class="text-sm text-calm-muted leading-relaxed" id="resultMascotMessage">
+                            Кепчик пишається твоєю концентрацією! Подивися на свій бал та детальний розбір кожного завдання нижче.
+                        </p>
+
+                        <!-- Breakdown Pills -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                            <div class="p-3.5 rounded-2xl bg-calm-bg border border-emerald-900/10">
+                                <div class="text-[11px] text-calm-muted font-medium">1. Passive Voice</div>
+                                <div class="font-display font-bold text-lg text-calm-kseNavy mt-0.5"><span id="scoreTask1">0.00</span> <span class="text-xs text-slate-400">/ 1.5</span></div>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-calm-bg border border-emerald-900/10">
+                                <div class="text-[11px] text-calm-muted font-medium">2. Reported Speech</div>
+                                <div class="font-display font-bold text-lg text-calm-kseNavy mt-0.5"><span id="scoreTask2">0.00</span> <span class="text-xs text-slate-400">/ 1.5</span></div>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-calm-bg border border-emerald-900/10">
+                                <div class="text-[11px] text-calm-muted font-medium">3. Vocabulary</div>
+                                <div class="font-display font-bold text-lg text-calm-kseNavy mt-0.5"><span id="scoreTask3">0.00</span> <span class="text-xs text-slate-400">/ 1.5</span></div>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-calm-bg border border-emerald-900/10">
+                                <div class="text-[11px] text-calm-muted font-medium">4. Definitions</div>
+                                <div class="font-display font-bold text-lg text-calm-kseNavy mt-0.5"><span id="scoreTask4">0.00</span> <span class="text-xs text-slate-400">/ 1.5</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <button onclick="copyResultSummary()" class="px-5 py-2.5 rounded-xl bg-calm-kseNavy hover:bg-blue-900 text-white text-xs sm:text-sm font-semibold shadow-sm calm-transition">
+                                📋 Скопіювати результат для викладача
+                            </button>
+                            <button onclick="returnToHomeForRetry()" class="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-semibold shadow-sm calm-transition">
+                                🔄 Спробувати інший варіант
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Big Score Circle Card -->
+                    <div class="lg:col-span-4 flex flex-col items-center justify-center p-6 rounded-3xl bg-gradient-to-br from-emerald-50 via-sky-50 to-amber-50 border border-emerald-200/80 text-center">
+                        <div class="text-xs font-bold uppercase tracking-wider text-calm-muted mb-1">Підсумкова оцінка</div>
+                        <div class="font-display font-black text-5xl sm:text-6xl text-calm-kseNavy my-1">
+                            <span id="totalScoreDisplay">0.00</span><span class="text-2xl text-slate-400 font-bold"> / 6.0</span>
+                        </div>
+                        <div id="totalPercentBadge" class="px-3 py-1 rounded-full bg-white text-emerald-800 font-bold text-xs shadow-sm mt-1">
+                            0% виконано
+                        </div>
+                        <div id="resultMetaInfo" class="text-xs text-calm-muted mt-4 space-y-0.5">
+                            <div>Час виконання: 00:00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Answer Key & Explanations -->
+            <div class="bg-white rounded-3xl border border-emerald-900/10 shadow-sm p-6 sm:p-8 space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <h3 class="font-display text-xl font-bold text-calm-kseNavy">Детальний розбір відповідей за ключем (Answer Key)</h3>
+                    <p class="text-xs sm:text-sm text-calm-muted">Порівняй свої відповіді з еталонними ключами та граматичними поясненнями.</p>
+                </div>
+                <div id="detailedReviewContainer" class="space-y-6">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== MODAL: BREATHING EXERCISE WITH KEPCHYK ==================== -->
+    <div id="breathingModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-xl border border-emerald-900/10 text-center space-y-5 relative">
+            <button onclick="closeBreathingModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-sm font-bold">
+                ✕
+            </button>
+
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
+                <span>🐾 Антистрес-практика з Кепчиком</span>
+            </div>
+
+            <h3 class="font-display text-xl font-bold text-calm-kseNavy">Квадратне дихання (4–4–4)</h3>
+            <p class="text-xs sm:text-sm text-calm-muted">
+                Як психолог ти знаєш: повільний видих активує парасимпатичну нервову систему і знижує тривожність за 30 секунд.
+            </p>
+
+            <!-- Animated Breathing Circle -->
+            <div class="py-8 flex items-center justify-center">
+                <div id="breathingVisualCircle" class="w-36 h-36 rounded-full bg-emerald-100 border-4 border-emerald-400 flex flex-col items-center justify-center shadow-inner breathe-circle">
+                    <span class="text-3xl mb-1">🐾</span>
+                    <span id="breathingPhaseText" class="font-display font-bold text-sm text-emerald-950">Вдихни...</span>
+                    <span id="breathingTimerCount" class="text-xs font-mono text-emerald-700 mt-0.5">4 с</span>
+                </div>
+            </div>
+
+            <p class="text-xs text-calm-muted italic">
+                «Ти знаєш більше, ніж тобі здається в момент хвилювання. Довірся своїй пам'яті.» — Кепчик 💙
+            </p>
+
+            <button onclick="closeBreathingModal()" class="w-full py-3 rounded-2xl bg-calm-kseNavy hover:bg-blue-900 text-white font-semibold text-sm calm-transition">
+                Дякую, мені спокійніше — повернутися
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL: MANDATORY DISCLAIMER (DEMO & LIABILITY) ==================== -->
+    <div id="disclaimerModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/65 backdrop-blur-md p-4 select-none">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border-2 border-amber-300/80 space-y-5 relative animate-fadeIn">
+            <!-- Header Badge -->
+            <div class="flex items-center justify-between gap-2">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100 text-amber-900 text-xs font-bold">
+                    <span>⚠️ Важливе попередження</span>
+                    <span>•</span>
+                    <span>DEMO VERSION</span>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-calm-kseNavy text-white flex items-center justify-center font-display font-extrabold text-xs shadow-sm">
+                    KSE
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div class="space-y-1.5">
+                <h2 class="font-display text-xl sm:text-2xl font-extrabold text-calm-kseNavy leading-snug">
+                    Умови використання демо-версії сервісу
+                </h2>
+                <p class="text-xs sm:text-sm text-calm-muted">
+                    Перед початком роботи з тренажером <strong class="text-calm-text">KSE CalmTest B2</strong>, будь ласка, уважно ознайомтеся з наступною інформацією:
+                </p>
+            </div>
+
+            <!-- Disclaimer Points Box -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-200/90 space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                <div class="flex items-start gap-3">
+                    <span class="text-lg shrink-0 mt-0.5">🛠️</span>
+                    <div>
+                        <strong class="font-bold text-calm-kseNavy">Демонстраційна версія (Demo):</strong>
+                        Ця програма є тестовою демо-версією, створеною для ознайомлення та зниження рівня тривожності перед тестуванням, тому в її роботі, ключах або перевірці відповідей <strong>можуть траплятися помилки чи неточності</strong>.
+                    </div>
+                </div>
+                <div class="h-px bg-amber-200/60 w-full"></div>
+                <div class="flex items-start gap-3">
+                    <span class="text-lg shrink-0 mt-0.5">📌</span>
+                    <div>
+                        <strong class="font-bold text-calm-kseNavy">Відмова від відповідальності:</strong>
+                        Автори та розробники не несуть жодної відповідальності за рівень ваших знань після використання цієї програми, а також за результати офіційних контрольних робіт, тестувань чи іспитів.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mandatory Checkbox -->
+            <label for="disclaimerCheckbox" class="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 hover:bg-emerald-50/60 border border-slate-200 hover:border-emerald-300 cursor-pointer calm-transition">
+                <input
+                    type="checkbox"
+                    id="disclaimerCheckbox"
+                    onchange="toggleDisclaimerButton()"
+                    class="mt-0.5 w-5 h-5 rounded-lg border-slate-300 text-emerald-700 focus:ring-emerald-600 cursor-pointer shrink-0 accent-emerald-700"
+                >
+                <span class="text-xs sm:text-sm font-medium text-calm-text leading-snug">
+                    Я розумію та погоджуюся, що це <strong>демо-версія</strong> (де можливі помилки), і що <strong>автори не несуть відповідальності</strong> за мої знання після користування програмою.
+                </span>
+            </label>
+
+            <!-- Proceed Button (Disabled until checkbox is checked) -->
+            <button
+                id="disclaimerContinueBtn"
+                onclick="acceptDisclaimerAndEnter()"
+                disabled
+                class="w-full py-3.5 px-6 rounded-2xl font-display font-bold text-sm sm:text-base bg-slate-200 text-slate-400 cursor-not-allowed calm-transition flex items-center justify-center gap-2"
+            >
+                <span>🐾 Продовжити до сервісу</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST NOTIFICATION ==================== -->
+    <div id="calmToast" class="fixed bottom-5 right-5 z-50 hidden max-w-sm bg-calm-kseNavy text-white px-4 py-3 rounded-2xl shadow-lg border border-white/15 flex items-center gap-3 text-xs sm:text-sm">
+        <span id="calmToastIcon">🐾</span>
+        <span id="calmToastText">Повідомлення</span>
+    </div>
+
+    <script>
+        // ============================================================================
+        // 1. COMPLETE VOCABULARY & PREPARATION DATABASE (from B2 Preparation Guide PDF)
+        // ============================================================================
+        const VOCAB_DATABASE = [
+            // Section 1.1: Gap Years and Career Breaks
+            { term: "gap year", def: "an interruption of studies or career to get new knowledge/experience", ua: "«пропущений рік», академвідпустка", mod: "1.1 Career Breaks" },
+            { term: "to enhance your CV", def: "to improve your curriculum vitae", ua: "покращити своє резюме", mod: "1.1 Career Breaks" },
+            { term: "to step back from your studies", def: "to stop your studies for some time", ua: "призупинити навчання на певний час", mod: "1.1 Career Breaks" },
+            { term: "to do smth tangible", def: "to do something important and noticeable", ua: "робити щось відчутне / суттєве", mod: "1.1 Career Breaks" },
+            { term: "underprivileged areas", def: "places where people lack advantages or opportunities", ua: "неблагополучні регіони світу", mod: "1.1 Career Breaks" },
+            { term: "intensive orientation course", def: "an introductory training course which is very intensive", ua: "інтенсивний ознайомлювальний курс", mod: "1.1 Career Breaks" },
+            { term: "day / week / year off", def: "period of time away from work due to leave, illness, or employer's grant", ua: "неробочий день / тиждень / рік", mod: "1.1 Career Breaks" },
+            { term: "participant / to participate", def: "a person taking part in an event / to take part in an activity", ua: "учасник / брати участь", mod: "1.1 Career Breaks" },
+            { term: "application form / to apply for", def: "a form completed in order to apply for a job or course", ua: "заява, анкета / подавати заявку на", mod: "1.1 Career Breaks" },
+            { term: "destination", def: "the place where someone or something is going or being sent", ua: "місце призначення / напрямок", mod: "1.1 Career Breaks" },
+            { term: "occupation", def: "a person's regular job, trade, or profession", ua: "професія, заняття, зайнятість", mod: "1.1 Career Breaks" },
+
+            // Section 1.2: Cover Letter (B2)
+            { term: "cover letter", def: "letter sent with CV explaining why you suit the position applied for", ua: "супровідний лист", mod: "1.2 Cover Letter" },
+            { term: "to break sales records", def: "to achieve the highest amount of sales for a product/company", ua: "побити рекорд із продажів", mod: "1.2 Cover Letter" },
+            { term: "to double revenues per venue", def: "to increase twofold money that a business receives per location", ua: "подвоїти середній прибуток на локацію", mod: "1.2 Cover Letter" },
+            { term: "to capture market share", def: "to gain control of a larger portion of the market", ua: "захопити частку ринку", mod: "1.2 Cover Letter" },
+            { term: "to optimize profitability", def: "to improve financial standing by making it easier to gain profit", ua: "оптимізувати прибутковість", mod: "1.2 Cover Letter" },
+            { term: "thank you for consideration", def: "polite phrase thanking for careful attention to an application", ua: "дякую за розгляд моєї кандидатури", mod: "1.2 Cover Letter" },
+            { term: "outgoing personality", def: "a friendly, communicative character who enjoys meeting people", ua: "товариський / відкритий характер", mod: "1.2 Cover Letter" },
+            { term: "to embark on", def: "to start doing something new, significant, or challenging", ua: "братися за, розпочинати", mod: "1.2 Cover Letter" },
+            { term: "to make a good impression", def: "to produce an attractive or favorable opinion about oneself", ua: "справляти гарне враження", mod: "1.2 Cover Letter" },
+            { term: "sophisticated language", def: "advanced, university-level terminology, syntax, and expressions", ua: "витончене, складне мовлення", mod: "1.2 Cover Letter" },
+            { term: "accomplishment", def: "something successful achieved through dedication and hard work", ua: "досягнення, успіх", mod: "1.2 Cover Letter" },
+
+            // Section 2.1: Corporate Social Responsibility (CSR)
+            { term: "to maintain reasonable prices", def: "to keep pricing fair and stable without excessive markups", ua: "підтримувати розумні / помірні ціни", mod: "2.1 CSR" },
+            { term: "to service promptly & accurately", def: "to provide clients what they require strictly on time and correctly", ua: "обслуговувати швидко та безпомилково", mod: "2.1 CSR" },
+            { term: "to make a fair profit", def: "to earn legitimate revenue while adhering strictly to ethical rules", ua: "отримувати справедливий прибуток", mod: "2.1 CSR" },
+            { term: "good works and charities", def: "philanthropic aid, decent wages, and support for vulnerable groups", ua: "добрі справи та благодійність", mod: "2.1 CSR" },
+            { term: "credo", def: "a formal statement of beliefs and guiding ethical principles", ua: "кредо, життєві орієнтири", mod: "2.1 CSR" },
+            { term: "to strive for", def: "to make vigorous, determined efforts to attain a chosen goal", ua: "прагнути, докладати зусиль", mod: "2.1 CSR" },
+            { term: "dignity", def: "calm, honorable demeanor evoking high mutual respect", ua: "гідність, повага до себе", mod: "2.1 CSR" },
+            { term: "entrepreneur", def: "an individual who sets up businesses and assumes commercial risks", ua: "підприємець / підприємиця", mod: "2.1 CSR" },
+            { term: "carbon footprint", def: "total amount of greenhouse gas emissions generated by operations", ua: "вуглецевий слід", mod: "2.1 CSR" },
+            { term: "biodegradable", def: "substance capable of decaying naturally without damaging nature", ua: "біорозкладний", mod: "2.1 CSR" },
+            { term: "sustainable", def: "causing negligible ecological damage, viable over long periods", ua: "сталий, екологічно безпечний", mod: "2.1 CSR" },
+
+            // Section 2.2: Meetings, Ethical Behavior & Corporate Governance
+            { term: "to stick to the agenda", def: "to confine discussions strictly to scheduled items", ua: "дотримуватися порядку денного", mod: "2.2 Ethics & Meetings" },
+            { term: "trustworthy", def: "reliable, authentic, and worthy of complete confidence", ua: "надійний, достовірний", mod: "2.2 Ethics & Meetings" },
+            { term: "deliberately misleading", def: "intentionally presenting falsehoods or distortions as facts", ua: "навмисне введення в оману", mod: "2.2 Ethics & Meetings" },
+            { term: "to obey the law", def: "to strictly observe statutes, legal directives, and regulations", ua: "дотримуватися вимог закону", mod: "2.2 Ethics & Meetings" },
+            { term: "to respect human dignity", def: "to uphold the intrinsic worth and equal rights of individuals", ua: "поважати людську гідність", mod: "2.2 Ethics & Meetings" },
+            { term: "to recognize merit", def: "to formally acknowledge commendable qualities or performance", ua: "визнавати чесноти / заслуги", mod: "2.2 Ethics & Meetings" },
+            { term: "to sidetrack", def: "to divert attention away from core business to minor issues", ua: "збивати з теми, відволікати(ся)", mod: "2.2 Ethics & Meetings" },
+
+            // Section 3: Presentations & Visuals
+            { term: "hook", def: "something attractive that catches audience's interest and attention", ua: "«гачок» (слова, що привертають увагу)", mod: "3.1 Presentations" },
+            { term: "call for actions", def: "a clear request, challenge, or appeal encouraging people to take action", ua: "заклик до дій", mod: "3.1 Presentations" },
+            { term: "to stimulate the audience", def: "to encourage audience engagement, questions, or participation", ua: "стимулювати / залучати аудиторію", mod: "3.1 Presentations" },
+            { term: "to state the goals clearly", def: "to articulate precise objectives explicitly from the start", ua: "чітко формулювати цілі", mod: "3.1 Presentations" },
+            { term: "a projector", def: "optical/electrical device projecting slides, images, or video onto a screen", ua: "проєктор", mod: "3.2 Visuals & Trends" },
+            { term: "to interpret", def: "to clarify, explain, and unpack the underlying meaning of data", ua: "тлумачити, інтерпретувати", mod: "3.2 Visuals & Trends" },
+            { term: "handouts", def: "printed summary materials distributed to participants before/after a talk", ua: "роздатковий матеріал (хендаути)", mod: "3.2 Visuals & Trends" },
+            { term: "perceived drop", def: "a visible, noticeable decline or decrease in statistics", ua: "відчутний / помітний спад", mod: "3.2 Visuals & Trends" },
+            { term: "a pie-chart", def: "a circular statistical graphic divided into slices illustrating proportions", ua: "кругова діаграма", mod: "3.2 Visuals & Trends" },
+            { term: "a bar-chart", def: "chart displaying categorical data with rectangular bars proportional to values", ua: "стовпчаста діаграма", mod: "3.2 Visuals & Trends" },
+            { term: "figures", def: "numerical values, amounts, or statistics expressed in digits", ua: "числа, статистичні показники, цифри", mod: "3.2 Visuals & Trends" }
+        ];
+
+        // ============================================================================
+        // 2. THREE OFFICIAL TEST VARIANTS (from B2 English Practice Tests PDF)
+        // ============================================================================
+        const TEST_VARIANTS = {
+            1: {
+                id: 1,
+                name: "ВАРІАНТ 1 — РІВЕНЬ 1: БАЗОВИЙ (EASY / FOUNDATION B2)",
+                shortBadge: "ВАРІАНТ 1 • FOUNDATION B2",
+                task1Instruction: "Розкрийте дужки, поставивши дієслово у правильну часову форму Passive Voice.",
+                task1: [
+                    {
+                        id: 1,
+                        before: "Reasonable prices",
+                        verb: "maintain",
+                        after: "by our retail chain every year.",
+                        accepted: ["are maintained"],
+                        canonical: "are maintained",
+                        note: "Present Simple Passive (every year → are + V3)"
+                    },
+                    {
+                        id: 2,
+                        before: "The application form",
+                        verb: "submit",
+                        after: "by the candidate yesterday.",
+                        accepted: ["was submitted"],
+                        canonical: "was submitted",
+                        note: "Past Simple Passive (yesterday → was + V3)"
+                    },
+                    {
+                        id: 3,
+                        before: "Printed handouts",
+                        verb: "distribute",
+                        after: "to all participants tomorrow.",
+                        accepted: ["will be distributed"],
+                        canonical: "will be distributed",
+                        note: "Future Simple Passive (tomorrow → will be + V3)"
+                    },
+                    {
+                        id: 4,
+                        before: "Strict quality laws must",
+                        verb: "obey",
+                        after: "by every corporate employee.",
+                        accepted: ["be obeyed", "must be obeyed"],
+                        canonical: "be obeyed",
+                        note: "Modal Passive (must + be + V3)"
+                    },
+                    {
+                        id: 5,
+                        before: "Right now, the cover letter",
+                        verb: "review",
+                        after: "by the HR manager.",
+                        accepted: ["is being reviewed"],
+                        canonical: "is being reviewed",
+                        note: "Present Continuous Passive (Right now → is being + V3)"
+                    },
+                    {
+                        id: 6,
+                        before: "A larger market share",
+                        verb: "capture",
+                        after: "by our sales team already.",
+                        accepted: ["has been captured"],
+                        canonical: "has been captured",
+                        note: "Present Perfect Passive (already → has been + V3)"
+                    }
+                ],
+                task2Instruction: "Трансформуйте речення з прямої мови у Reported Speech (дотримуйтесь узгодження часів).",
+                task2: [
+                    {
+                        id: 1,
+                        direct: '"I strive for high results in my daily work," the applicant said.',
+                        prefix: "The applicant said (that)",
+                        canonical: "he/she strove (or strived) for high results in his/her daily work.",
+                        acceptedFull: [
+                            "he strove for high results in his daily work",
+                            "she strove for high results in her daily work",
+                            "he strived for high results in his daily work",
+                            "she strived for high results in her daily work",
+                            "he/she strove for high results in his/her daily work",
+                            "he/she strived for high results in his/her daily work",
+                            "they strove for high results in their daily work",
+                            "they strived for high results in their daily work"
+                        ],
+                        keyTokens: [["strove", "strived"], ["daily work"]],
+                        chips: ["he strove for high results in his daily work", "she strived for high results in her daily work"]
+                    },
+                    {
+                        id: 2,
+                        direct: '"We will stick to the agenda tomorrow," the project manager promised.',
+                        prefix: "The manager promised (that)",
+                        canonical: "they would stick to the agenda the next day (or the following day).",
+                        acceptedFull: [
+                            "they would stick to the agenda the next day",
+                            "they would stick to the agenda the following day"
+                        ],
+                        keyTokens: [["would stick"], ["next day", "following day"]],
+                        chips: ["they would stick to the agenda the next day", "they would stick to the agenda the following day"]
+                    },
+                    {
+                        id: 3,
+                        direct: '"Do you use biodegradable materials in production?" the journalist asked us.',
+                        prefix: "The journalist asked us",
+                        canonical: "if/whether we used biodegradable materials in production.",
+                        acceptedFull: [
+                            "if we used biodegradable materials in production",
+                            "whether we used biodegradable materials in production"
+                        ],
+                        keyTokens: [["if", "whether"], ["we used"]],
+                        chips: ["if we used biodegradable materials in production", "whether we used biodegradable materials in production"]
+                    }
+                ],
+                task3Options: [
+                    "gap year",
+                    "enhance your CV",
+                    "underprivileged areas",
+                    "cover letter",
+                    "outgoing personality",
+                    "make a good impression"
+                ],
+                task3Segments: [
+                    "Many students take a ",
+                    " before starting their career. Volunteering in ",
+                    " is a great chance to do something tangible and ",
+                    ". When applying for a job, you should send a ",
+                    " explaining why you suit the position. Recruiters also value an ",
+                    " because communicative people work well in teams and easily ",
+                    " during interviews."
+                ],
+                task3Answers: [
+                    "gap year",
+                    "underprivileged areas",
+                    "enhance your CV",
+                    "cover letter",
+                    "outgoing personality",
+                    "make a good impression"
+                ],
+                task4: [
+                    { id: 1, letter: "o", def: "a person's regular job, trade, or profession", accepted: ["occupation"], canonical: "occupation" },
+                    { id: 2, letter: "d", def: "the place where someone or something is going or being sent", accepted: ["destination"], canonical: "destination" },
+                    { id: 3, letter: "c", def: "a formal statement of beliefs and guiding ethical principles", accepted: ["credo"], canonical: "credo" },
+                    { id: 4, letter: "h", def: "something attractive that catches audience's interest and attention", accepted: ["hook"], canonical: "hook" },
+                    { id: 5, letter: "p", def: "optical/electrical device projecting slides or images onto a screen", accepted: ["projector", "a projector"], canonical: "projector" },
+                    { id: 6, letter: "f", def: "numerical values, amounts, or statistics expressed in digits", accepted: ["figures"], canonical: "figures" }
+                ]
+            },
+
+            2: {
+                id: 2,
+                name: "ВАРІАНТ 2 — РІВЕНЬ 2: СЕРЕДНІЙ (MEDIUM / STANDARD B2)",
+                shortBadge: "ВАРІАНТ 2 • STANDARD B2",
+                task1Instruction: "Розкрийте дужки у Passive Voice (Continuous, Perfect, Modal та Impersonal Passive).",
+                task1: [
+                    {
+                        id: 1,
+                        before: "When I entered the room, the agenda",
+                        verb: "discuss",
+                        after: "by the board.",
+                        accepted: ["was being discussed"],
+                        canonical: "was being discussed",
+                        note: "Past Continuous Passive (тривала дія в минулому → was being + V3)"
+                    },
+                    {
+                        id: 2,
+                        before: "Before the audit began, the settlement",
+                        verb: "reach",
+                        after: "by both firms.",
+                        accepted: ["had been reached"],
+                        canonical: "had been reached",
+                        note: "Past Perfect Passive (Before the audit began → had been + V3)"
+                    },
+                    {
+                        id: 3,
+                        before: "Since last quarter, revenues per venue",
+                        verb: "double",
+                        after: "across all branches.",
+                        accepted: ["have been doubled"],
+                        canonical: "have been doubled",
+                        note: "Present Perfect Passive (Since last quarter → have been + V3)"
+                    },
+                    {
+                        id: 4,
+                        before: "All corporate clients must",
+                        verb: "service",
+                        after: "promptly and accurately.",
+                        accepted: ["be serviced", "must be serviced"],
+                        canonical: "be serviced",
+                        note: "Modal Passive (must + be + V3)"
+                    },
+                    {
+                        id: 5,
+                        before: "By next month, the new eco-packaging",
+                        verb: "develop",
+                        after: "by our team.",
+                        accepted: ["will have been developed"],
+                        canonical: "will have been developed",
+                        note: "Future Perfect Passive (By next month → will have been + V3)"
+                    },
+                    {
+                        id: 6,
+                        before: "In official reports, it",
+                        verb: "acknowledge",
+                        after: "that sustainability is vital.",
+                        accepted: ["is acknowledged"],
+                        canonical: "is acknowledged",
+                        note: "Impersonal Passive (It is acknowledged that...)"
+                    }
+                ],
+                task2Instruction: "Трансформуйте речення у Reported Speech (Past Simple, Present Perfect, Special Questions).",
+                task2: [
+                    {
+                        id: 1,
+                        direct: '"Our sales team broke sales records last year," the director noted.',
+                        prefix: "The director noted (that)",
+                        canonical: "their (regional) sales team had broken sales records the year before (or the previous year).",
+                        acceptedFull: [
+                            "their sales team had broken sales records the year before",
+                            "their sales team had broken sales records the previous year",
+                            "their regional sales team had broken sales records the year before",
+                            "their regional sales team had broken sales records the previous year"
+                        ],
+                        keyTokens: [["had broken"], ["year before", "previous year"]],
+                        chips: ["their sales team had broken sales records the year before", "their sales team had broken sales records the previous year"]
+                    },
+                    {
+                        id: 2,
+                        direct: '"Why did you sidetrack the debate during the meeting?" the chair asked him.',
+                        prefix: "The chair asked him",
+                        canonical: "why he had sidetracked the debate during the meeting.",
+                        acceptedFull: [
+                            "why he had sidetracked the debate during the meeting"
+                        ],
+                        keyTokens: [["why he had sidetracked"], ["debate"]],
+                        chips: ["why he had sidetracked the debate during the meeting"]
+                    },
+                    {
+                        id: 3,
+                        direct: '"We have significantly cut our carbon footprint this year," the engineer added.',
+                        prefix: "The engineer added (that)",
+                        canonical: "they had significantly cut (or reduced) their carbon footprint that year.",
+                        acceptedFull: [
+                            "they had significantly cut their carbon footprint that year",
+                            "they had significantly reduced their carbon footprint that year"
+                        ],
+                        keyTokens: [["had significantly cut", "had significantly reduced"], ["that year"]],
+                        chips: ["they had significantly cut their carbon footprint that year", "they had significantly reduced their carbon footprint that year"]
+                    }
+                ],
+                task3Options: [
+                    "carbon footprint",
+                    "sustainable",
+                    "make a fair profit",
+                    "trustworthy",
+                    "recognize merit",
+                    "stick to the agenda"
+                ],
+                task3Segments: [
+                    "Corporate Social Responsibility is vital for modern business. An ethical company strives to ",
+                    " while respecting society. Firms invest in green tech to reduce their ",
+                    " and keep operations ecologically ",
+                    ". Leaders must remain honest and ",
+                    " and always ",
+                    " when employees perform well. Also, during formal meetings, participants should ",
+                    " without wasting time."
+                ],
+                task3Answers: [
+                    "make a fair profit",
+                    "carbon footprint",
+                    "sustainable",
+                    "trustworthy",
+                    "recognize merit",
+                    "stick to the agenda"
+                ],
+                task4: [
+                    { id: 1, letter: "a", def: "something successful achieved through dedication and hard work", accepted: ["accomplishment"], canonical: "accomplishment" },
+                    { id: 2, letter: "e", def: "an individual who sets up businesses and assumes commercial risks", accepted: ["entrepreneur"], canonical: "entrepreneur" },
+                    { id: 3, letter: "b", def: "substance capable of decaying naturally without damaging nature", accepted: ["biodegradable"], canonical: "biodegradable" },
+                    { id: 4, letter: "h", def: "printed summary materials distributed to participants before/after a talk", accepted: ["handouts"], canonical: "handouts" },
+                    { id: 5, letter: "i", def: "to clarify, explain, and unpack the underlying meaning of data", accepted: ["interpret", "to interpret"], canonical: "interpret" },
+                    { id: 6, letter: "p... c...", def: "a circular statistical graphic divided into slices illustrating proportions", accepted: ["pie-chart", "pie chart", "a pie-chart"], canonical: "pie-chart" }
+                ]
+            },
+
+            3: {
+                id: 3,
+                name: "ВАРІАНТ 3 — РІВЕНЬ 3: ВИСОКИЙ (HIGH / ADVANCED B2+)",
+                shortBadge: "ВАРІАНТ 3 • ADVANCED B2+",
+                task1Instruction: "Розкрийте дужки у Passive Voice (Modal Perfect, Future Perfect, подвійний додаток, заміна Perfect Continuous).",
+                task1: [
+                    {
+                        id: 1,
+                        before: "The board should",
+                        verb: "inform",
+                        after: "about the drop in sales much earlier.",
+                        accepted: ["have been informed", "should have been informed"],
+                        canonical: "have been informed",
+                        note: "Modal Perfect Passive (should + have been + V3)"
+                    },
+                    {
+                        id: 2,
+                        before: "By May next year, the training center",
+                        verb: "build",
+                        after: "in that region.",
+                        accepted: ["will have been built"],
+                        canonical: "will have been built",
+                        note: "Future Perfect Passive (By May next year → will have been + V3)"
+                    },
+                    {
+                        id: 3,
+                        before: "Last week, the best participant",
+                        verb: "offer",
+                        after: "a managerial position.",
+                        accepted: ["was offered"],
+                        canonical: "was offered",
+                        note: "Past Simple Passive з двома додатками (Last week → was offered)"
+                    },
+                    {
+                        id: 4,
+                        before: "While the slides",
+                        verb: "project",
+                        after: "onto the screen, the lamp failed.",
+                        accepted: ["were being projected"],
+                        canonical: "were being projected",
+                        note: "Past Continuous Passive (While the slides... → were being + V3)"
+                    },
+                    {
+                        id: 5,
+                        before: "Deceptive financial figures had",
+                        verb: "present",
+                        after: "before the auditor arrived.",
+                        accepted: ["been presented", "had been presented"],
+                        canonical: "been presented",
+                        note: "Past Perfect Passive (had + been + V3)"
+                    },
+                    {
+                        id: 6,
+                        before: "This ethical issue",
+                        verb: "investigate",
+                        after: "by the committee for three weeks now.",
+                        accepted: ["has been investigated"],
+                        canonical: "has been investigated",
+                        note: "Present Perfect Passive замість Present Perfect Continuous у пасиві"
+                    }
+                ],
+                task2Instruction: "Трансформуйте речення у Reported Speech (Past Continuous, накази, модальне дієслово must).",
+                task2: [
+                    {
+                        id: 1,
+                        direct: '"I was writing a cover letter when the recruiter called," the candidate explained.',
+                        prefix: "The candidate explained (that)",
+                        canonical: "he/she had been writing a cover letter when the recruiter (had) called.",
+                        acceptedFull: [
+                            "he had been writing a cover letter when the recruiter called",
+                            "she had been writing a cover letter when the recruiter called",
+                            "he had been writing a cover letter when the recruiter had called",
+                            "she had been writing a cover letter when the recruiter had called",
+                            "he had been writing a cover letter when the recruiter called him",
+                            "she had been writing a cover letter when the recruiter called her",
+                            "he/she had been writing a cover letter when the recruiter called"
+                        ],
+                        keyTokens: [["had been writing"], ["recruiter"]],
+                        chips: ["she had been writing a cover letter when the recruiter called", "he had been writing a cover letter when the recruiter called"]
+                    },
+                    {
+                        id: 2,
+                        direct: '"Submit your application promptly and do not sidetrack the team!" the director told me.',
+                        prefix: "The director told me",
+                        canonical: "to submit my application (form) promptly and not to sidetrack the team.",
+                        acceptedFull: [
+                            "to submit my application promptly and not to sidetrack the team",
+                            "to submit my application form promptly and not to sidetrack the team"
+                        ],
+                        keyTokens: [["to submit my application"], ["not to sidetrack"]],
+                        chips: ["to submit my application promptly and not to sidetrack the team"]
+                    },
+                    {
+                        id: 3,
+                        direct: '"You must obey the law and respect human dignity here," the officer warned them.',
+                        prefix: "The officer warned them (that)",
+                        canonical: "they had to obey the law and respect human dignity there.",
+                        acceptedFull: [
+                            "they had to obey the law and respect human dignity there"
+                        ],
+                        keyTokens: [["had to obey"], ["there"]],
+                        chips: ["they had to obey the law and respect human dignity there"]
+                    }
+                ],
+                task3Options: [
+                    "state the goals clearly",
+                    "stimulate the audience",
+                    "bar-chart",
+                    "perceived drop",
+                    "deliberately misleading",
+                    "call for actions"
+                ],
+                task3Segments: [
+                    "At the start of a presentation, a speaker must ",
+                    " to outline the agenda. During the talk, it is vital to ",
+                    " by inviting questions. When comparing regional data, a rectangular ",
+                    " works best. If statistics show a ",
+                    " in sales, never use ",
+                    " charts to hide the truth. End your speech with a clear ",
+                    "."
+                ],
+                task3Answers: [
+                    "state the goals clearly",
+                    "stimulate the audience",
+                    "bar-chart",
+                    "perceived drop",
+                    "deliberately misleading",
+                    "call for actions"
+                ],
+                task4: [
+                    { id: 1, letter: "t", def: "important and noticeable (e.g., to do something important and noticeable)", accepted: ["tangible", "to do smth tangible", "to do something tangible"], canonical: "tangible" },
+                    { id: 2, letter: "s... l...", def: "advanced, university-level terminology, syntax, and expressions", accepted: ["sophisticated language"], canonical: "sophisticated language" },
+                    { id: 3, letter: "o... p...", def: "to improve financial standing by making it easier to gain profit", accepted: ["optimize profitability", "to optimize profitability"], canonical: "optimize profitability" },
+                    { id: 4, letter: "s", def: "to divert attention away from core business to minor issues", accepted: ["sidetrack", "to sidetrack"], canonical: "sidetrack" },
+                    { id: 5, letter: "t", def: "reliable, authentic, and worthy of complete confidence", accepted: ["trustworthy"], canonical: "trustworthy" },
+                    { id: 6, letter: "s", def: "causing negligible ecological damage, viable over long periods", accepted: ["sustainable"], canonical: "sustainable" }
+                ]
+            }
+        };
+
+        // ============================================================================
+        // 3. STATE & PSYCHOLOGICAL MASCOT QUOTES
+        // ============================================================================
+        let selectedVariantId = 1;
+        let testInProgress = false;
+        let totalTimeSeconds = 20 * 60; // 1200 seconds = 20 minutes
+        let remainingSeconds = 20 * 60;
+        let timerInterval = null;
+        let calmTimerZenMode = false;
+
+        // Flashcard state
+        let currentFlashcardIndex = 0;
+        let isFlashcardFlipped = false;
+
+        // Breathing modal state
+        let breathingInterval = null;
+
+        // Ambient sound state (Web Audio API gentle drone)
+        let audioCtx = null;
+        let ambientPlaying = false;
+        let ambientGainNode = null;
+
+        const KEPCHYK_QUOTES = [
+            "«Пам'ятай: помилка — це просто зворотний зв'язок для мозку, а не вирок. Дихай рівно 🐾»",
+            "«Як психолог ти знаєш: коли плечі розслаблені, мозок отримує більше кисню і швидше згадує англійську!»",
+            "«Ти вже у KSE, ти вже молодець! Ці 20 хвилин — лише спокійна практика.»",
+            "«У Reported Speech головне — зробити спокійний крок назад у часі (Backshift). Ти впораєшся!»",
+            "«Не поспішай: 20 хвилин — це більш ніж достатньо для 21 короткого пункту.»"
+        ];
+
+        // ============================================================================
+        // 4. INITIALIZATION & UI HELPERS
+        // ============================================================================
+        let disclaimerAccepted = false;
+
+        window.onload = function() {
+            renderVocabTable(VOCAB_DATABASE);
+            updateFlashcardUI();
+            selectVariant(1);
+            // Lock background scrolling until the user accepts the disclaimer
+            document.body.style.overflow = 'hidden';
+        };
+
+        function toggleDisclaimerButton() {
+            const checkbox = document.getElementById("disclaimerCheckbox");
+            const btn = document.getElementById("disclaimerContinueBtn");
+            if (checkbox && checkbox.checked) {
+                btn.disabled = false;
+                btn.className = "w-full py-3.5 px-6 rounded-2xl font-display font-bold text-sm sm:text-base bg-calm-kseNavy hover:bg-blue-900 text-white shadow-md hover:shadow-lg cursor-pointer calm-transition flex items-center justify-center gap-2";
+            } else {
+                btn.disabled = true;
+                btn.className = "w-full py-3.5 px-6 rounded-2xl font-display font-bold text-sm sm:text-base bg-slate-200 text-slate-400 cursor-not-allowed calm-transition flex items-center justify-center gap-2";
+            }
+        }
+
+        function acceptDisclaimerAndEnter() {
+            const checkbox = document.getElementById("disclaimerCheckbox");
+            if (!checkbox || !checkbox.checked) return;
+
+            disclaimerAccepted = true;
+            const modal = document.getElementById("disclaimerModal");
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+            document.body.style.overflow = '';
+            showToast("Дякуємо за підтвердження! Спокійної та приємної практики з Кепчиком 🐾", "🌿");
+        }
+
+        function showToast(message, icon = "🐾") {
+            const toast = document.getElementById("calmToast");
+            document.getElementById("calmToastIcon").textContent = icon;
+            document.getElementById("calmToastText").textContent = message;
+            toast.classList.remove("hidden");
+            clearTimeout(window.toastTimeout);
+            window.toastTimeout = setTimeout(() => {
+                toast.classList.add("hidden");
+            }, 4000);
+        }
+
+        function petKepchyk() {
+            const randomQuote = KEPCHYK_QUOTES[Math.floor(Math.random() * KEPCHYK_QUOTES.length)];
+            document.getElementById("homeMascotQuote").textContent = randomQuote;
+            const companionEl = document.getElementById("testCompanionTip");
+            if (companionEl) companionEl.textContent = randomQuote;
+            showToast("Кепчик муркоче і передає тобі промені спокою! 💙", "🐾");
+        }
+
+        function scrollToElement(id) {
+            switchMainTab('setup');
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function handleNavClick(target) {
+            if (testInProgress) {
+                showToast("Тест зараз триває! Заверши його або дочекайся закінчення таймера.", "⏱️");
+                return;
+            }
+            if (target === 'home') {
+                document.getElementById("viewHome").classList.remove("hidden");
+                document.getElementById("viewActiveTest").classList.add("hidden");
+                document.getElementById("viewResults").classList.add("hidden");
+            }
+        }
+
+        function switchMainTab(tab) {
+            const setupView = document.getElementById("subviewTestSetup");
+            const prepView = document.getElementById("subviewPrepGuide");
+            const btnSetup = document.getElementById("tabBtnTestSetup");
+            const btnPrep = document.getElementById("tabBtnPrepGuide");
+
+            if (tab === 'setup') {
+                setupView.classList.remove("hidden");
+                prepView.classList.add("hidden");
+                btnSetup.className = "px-5 py-2.5 rounded-2xl font-display font-bold text-sm bg-calm-kseNavy text-white shadow-sm calm-transition";
+                btnPrep.className = "px-5 py-2.5 rounded-2xl font-display font-bold text-sm bg-white text-calm-text hover:bg-emerald-50 border border-emerald-900/10 calm-transition";
+            } else {
+                setupView.classList.add("hidden");
+                prepView.classList.remove("hidden");
+                btnPrep.className = "px-5 py-2.5 rounded-2xl font-display font-bold text-sm bg-calm-kseNavy text-white shadow-sm calm-transition";
+                btnSetup.className = "px-5 py-2.5 rounded-2xl font-display font-bold text-sm bg-white text-calm-text hover:bg-emerald-50 border border-emerald-900/10 calm-transition";
+            }
+        }
+
+        function handleMoodChange(mood) {
+            const box = document.getElementById("moodFeedbackBox");
+            const text = document.getElementById("moodFeedbackText");
+            if (mood === 'nervous') {
+                box.classList.remove("hidden");
+                text.textContent = "Це абсолютно природна реакція організму. Давай зробимо 3 спокійних вдихи з Кепчиком перед початком — це знизить рівень напруги.";
+            } else if (mood === 'tired') {
+                box.classList.remove("hidden");
+                text.textContent = "Коли ми втомлені, найкраще працює м'який фокус. Увімкни «Фоновий спокій» угорі та проходь завдання без поспіху.";
+            } else {
+                box.classList.add("hidden");
+            }
+        }
+
+        function selectVariant(id) {
+            selectedVariantId = id;
+            [1, 2, 3].forEach(num => {
+                const card = document.getElementById(`variantCard${num}`);
+                if (num === id) {
+                    card.className = "cursor-pointer rounded-2xl p-5 border-2 border-calm-sageDark bg-emerald-50/50 shadow-sm calm-transition relative flex flex-col justify-between";
+                } else {
+                    card.className = "cursor-pointer rounded-2xl p-5 border-2 border-slate-200 hover:border-emerald-600/50 bg-white calm-transition relative flex flex-col justify-between";
+                }
+            });
+        }
+
+        // ============================================================================
+        // 5. PREPARATION GUIDE & FLASHCARDS LOGIC
+        // ============================================================================
+        function renderVocabTable(list) {
+            const tbody = document.getElementById("vocabTableBody");
+            tbody.innerHTML = list.map(item => `
+                <tr class="hover:bg-emerald-50/40 calm-transition">
+                    <td class="p-3.5 font-semibold text-calm-kseNavy">${item.term}</td>
+                    <td class="p-3.5 text-slate-600">${item.def}</td>
+                    <td class="p-3.5 text-emerald-900 font-medium">${item.ua}</td>
+                    <td class="p-3.5"><span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs">${item.mod}</span></td>
+                </tr>
+            `).join("");
+        }
+
+        function filterVocabTable() {
+            const q = document.getElementById("vocabSearchInput").value.trim().toLowerCase();
+            if (!q) {
+                renderVocabTable(VOCAB_DATABASE);
+                return;
+            }
+            const filtered = VOCAB_DATABASE.filter(item =>
+                item.term.toLowerCase().includes(q) ||
+                item.def.toLowerCase().includes(q) ||
+                item.ua.toLowerCase().includes(q)
+            );
+            renderVocabTable(filtered);
+        }
+
+        function showGuideSection(sec) {
+            const secs = { vocab: 'guideSecVocab', passive: 'guideSecPassive', reported: 'guideSecReported' };
+            const btns = { vocab: 'guideBtnVocab', passive: 'guideBtnPassive', reported: 'guideBtnReported' };
+            Object.keys(secs).forEach(k => {
+                document.getElementById(secs[k]).classList.toggle("hidden", k !== sec);
+                document.getElementById(btns[k]).className = (k === sec)
+                    ? "px-4 py-2 rounded-xl text-xs font-bold bg-emerald-700 text-white calm-transition"
+                    : "px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 calm-transition";
+            });
+        }
+
+        function updateFlashcardUI() {
+            const item = VOCAB_DATABASE[currentFlashcardIndex];
+            document.getElementById("flashcardCounter").textContent = `${currentFlashcardIndex + 1} / ${VOCAB_DATABASE.length}`;
+            document.getElementById("flashcardCategory").textContent = item.mod;
+            document.getElementById("flashcardFront").textContent = item.term;
+            const backEl = document.getElementById("flashcardBack");
+            backEl.innerHTML = `
+                <div class="text-base sm:text-lg font-semibold text-emerald-800">${item.def}</div>
+                <div class="text-sm text-calm-muted">Українською: <strong>${item.ua}</strong></div>
+            `;
+            if (isFlashcardFlipped) {
+                backEl.classList.remove("hidden");
+            } else {
+                backEl.classList.add("hidden");
+            }
+        }
+
+        function flipFlashcard() {
+            isFlashcardFlipped = !isFlashcardFlipped;
+            updateFlashcardUI();
+        }
+
+        function nextFlashcard() {
+            currentFlashcardIndex = (currentFlashcardIndex + 1) % VOCAB_DATABASE.length;
+            isFlashcardFlipped = false;
+            updateFlashcardUI();
+        }
+
+        function prevFlashcard() {
+            currentFlashcardIndex = (currentFlashcardIndex - 1 + VOCAB_DATABASE.length) % VOCAB_DATABASE.length;
+            isFlashcardFlipped = false;
+            updateFlashcardUI();
+        }
+
+        // ============================================================================
+        // 6. RENDERING & STARTING THE 20-MINUTE SHORT TEST
+        // ============================================================================
+        function startTestSession() {
+            const v = TEST_VARIANTS[selectedVariantId];
+            const studentName = document.getElementById("studentNameInput").value.trim() || "Студент(-ка) психології KSE";
+            const studentGroup = document.getElementById("studentGroupInput").value.trim() || "KSE Psychology";
+
+            document.getElementById("activeVariantBadge").textContent = v.shortBadge;
+            document.getElementById("activeStudentBadge").textContent = `${studentName} (${studentGroup})`;
+            document.getElementById("activeTestTitle").textContent = v.name;
+            document.getElementById("task1Instruction").textContent = v.task1Instruction;
+            document.getElementById("task2Instruction").textContent = v.task2Instruction;
+
+            // Render Task 1 (Passive Voice)
+            const t1Container = document.getElementById("task1QuestionsContainer");
+            t1Container.innerHTML = v.task1.map(q => `
+                <div class="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 flex flex-wrap items-center gap-2 text-sm sm:text-base">
+                    <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-900 font-bold text-xs flex items-center justify-center shrink-0">${q.id}</span>
+                    <span>${q.before}</span>
+                    <input type="text" id="t1_q${q.id}" placeholder="(${q.verb})..." autocomplete="off"
+                        class="px-3.5 py-1.5 rounded-xl border border-slate-300 bg-white font-semibold text-calm-kseNavy text-sm min-w-[180px] sm:min-w-[220px]">
+                    <span class="text-xs font-mono px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200">(${q.verb})</span>
+                    <span>${q.after}</span>
+                </div>
+            `).join("");
+
+            // Render Task 2 (Reported Speech)
+            const t2Container = document.getElementById("task2QuestionsContainer");
+            t2Container.innerHTML = v.task2.map(q => `
+                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-900 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">${q.id}</span>
+                        <div class="font-medium text-sm sm:text-base text-calm-text">${q.direct}</div>
+                    </div>
+                    <div class="pl-8 space-y-2">
+                        <div class="text-xs sm:text-sm font-semibold text-emerald-900 flex items-center gap-1.5">
+                            <span>→ ${q.prefix}</span>
+                        </div>
+                        <input type="text" id="t2_q${q.id}" placeholder="Допишіть трансформовану частину речення у Reported Speech..." autocomplete="off"
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-white text-sm sm:text-base text-calm-kseNavy font-medium">
+                        <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                            <span class="text-[11px] text-calm-muted">Швидка підказка початку:</span>
+                            <button type="button" onclick="insertStarterChip('t2_q${q.id}', '${q.id === 3 && selectedVariantId === 1 ? 'if we ' : q.id === 2 && selectedVariantId === 2 ? 'why he ' : q.id === 2 && selectedVariantId === 3 ? 'to submit ' : 'they / he / she '}')"
+                                class="text-[11px] px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50">
+                                + Вставити займенник/сполучник
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+
+            // Render Task 3 (Vocabulary in Context)
+            const wbContainer = document.getElementById("task3WordBank");
+            wbContainer.innerHTML = v.task3Options.map((word, idx) => `
+                <span class="px-3 py-1 rounded-xl bg-white border border-emerald-900/15 text-xs sm:text-sm font-semibold text-calm-kseNavy shadow-sm">
+                    ${idx + 1}) ${word}
+                </span>
+            `).join("");
+
+            const t3Paragraph = document.getElementById("task3ContextParagraph");
+            let paragraphHTML = "";
+            for (let i = 0; i < 6; i++) {
+                paragraphHTML += `<span>${v.task3Segments[i]}</span>`;
+                paragraphHTML += `
+                    <span class="inline-flex items-center mx-1 my-1">
+                        <span class="px-1.5 py-1 rounded-l-xl bg-emerald-100 text-emerald-900 font-bold text-xs border border-r-0 border-emerald-300">(${i + 1})</span>
+                        <select id="t3_q${i + 1}" class="px-2.5 py-1 rounded-r-xl border border-emerald-300 bg-white font-semibold text-calm-kseNavy text-xs sm:text-sm">
+                            <option value="">— оберіть слово —</option>
+                            ${v.task3Options.map(opt => `<option value="${opt}">${opt}</option>`).join("")}
+                        </select>
+                    </span>
+                `;
+            }
+            paragraphHTML += `<span>${v.task3Segments[6]}</span>`;
+            t3Paragraph.innerHTML = paragraphHTML;
+
+            // Render Task 4 (Word by Definition)
+            const t4Container = document.getElementById("task4QuestionsContainer");
+            t4Container.innerHTML = v.task4.map(q => `
+                <div class="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                    <div class="md:col-span-5 flex items-center gap-2.5">
+                        <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-900 font-bold text-xs flex items-center justify-center shrink-0">${q.id}</span>
+                        <span class="px-2.5 py-1.5 rounded-xl bg-calm-kseNavy text-white font-mono font-bold text-xs shrink-0" title="Перша літера">${q.letter}...</span>
+                        <input type="text" id="t4_q${q.id}" placeholder="Впишіть слово на «${q.letter}»..." autocomplete="off"
+                            class="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white font-semibold text-calm-kseNavy text-sm">
+                    </div>
+                    <div class="md:col-span-7 text-xs sm:text-sm text-calm-text md:pl-2">
+                        <span class="text-calm-muted font-medium">Definition:</span> ${q.def}
+                    </div>
+                </div>
+            `).join("");
+
+            // Switch Views & Start 20:00 Timer
+            document.getElementById("viewHome").classList.add("hidden");
+            document.getElementById("viewResults").classList.add("hidden");
+            document.getElementById("viewActiveTest").classList.remove("hidden");
+            document.getElementById("headerTimerContainer").classList.remove("hidden");
+            document.getElementById("headerTimerContainer").classList.add("flex");
+
+            testInProgress = true;
+            totalTimeSeconds = 20 * 60;
+            remainingSeconds = 20 * 60;
+            updateTimerUI();
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
+                updateTimerUI();
+
+                if (remainingSeconds === 120) {
+                    showToast("Залишилося 2 хвилини. Спокійно переглянь свої відповіді 🌿", "⏳");
+                }
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    finishTest('timeout');
+                }
+            }, 1000);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast("Таймер на 20 хвилин запущено. Кепчик вірить у тебе! 🐾", "🌿");
+        }
+
+        function insertStarterChip(inputId, starterText) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            if (starterText === 'they / he / she ') {
+                input.value = "they ";
+            } else {
+                input.value = starterText;
+            }
+            input.focus();
+        }
+
+        function updateTimerUI() {
+            const mins = Math.floor(Math.max(0, remainingSeconds) / 60);
+            const secs = Math.max(0, remainingSeconds) % 60;
+            const formatted = calmTimerZenMode && remainingSeconds > 120
+                ? `${mins} хв`
+                : `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+            const timerText = document.getElementById("timerTextDisplay");
+            const progressBar = document.getElementById("timerProgressBar");
+            const dot = document.getElementById("timerDot");
+
+            timerText.textContent = formatted;
+            const pct = Math.max(0, (remainingSeconds / totalTimeSeconds) * 100);
+            progressBar.style.width = `${pct}%`;
+
+            if (remainingSeconds <= 120) {
+                progressBar.className = "h-full bg-amber-500 calm-transition";
+                dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping";
+            } else {
+                progressBar.className = "h-full bg-emerald-500 calm-transition";
+                dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+            }
+        }
+
+        function toggleCalmTimerMode() {
+            calmTimerZenMode = !calmTimerZenMode;
+            document.getElementById("calmTimerBtnLabel").textContent = calmTimerZenMode ? "⏱️ Показати сек" : "🧘 Дзен-таймер";
+            updateTimerUI();
+        }
+
+        function fastForwardTimerDemo() {
+            if (!testInProgress) return;
+            remainingSeconds = 8;
+            updateTimerUI();
+            showToast("Демо-режим: таймер встановлено на 8 секунд для перевірки автозакриття!", "⚡");
+        }
+
+        // ============================================================================
+        // 7. GRADING ENGINE & INSTANT AUTO-CLOSE RESULTS
+        // ============================================================================
+        function normalizeText(str) {
+            return (str || "")
+                .toLowerCase()
+                .replace(/[.,!?'"’“”]/g, "")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+
+        function finishTest(reason = 'manual') {
+            if (!testInProgress) return;
+            testInProgress = false;
+            clearInterval(timerInterval);
+
+            // Hide timer bar in header
+            document.getElementById("headerTimerContainer").classList.add("hidden");
+            document.getElementById("headerTimerContainer").classList.remove("flex");
+
+            const v = TEST_VARIANTS[selectedVariantId];
+            let score1 = 0;
+            let score2 = 0;
+            let score3 = 0;
+            let score4 = 0;
+
+            const reviewBlocks = [];
+
+            // --- Evaluate Task 1 (Passive Voice: 6 x 0.25 = 1.5) ---
+            let t1ReviewHTML = `<div class="space-y-2.5"><h4 class="font-display font-bold text-base text-calm-kseNavy">Завдання 1. Passive Voice (Пасивний стан)</h4>`;
+            v.task1.forEach(q => {
+                const rawUser = document.getElementById(`t1_q${q.id}`)?.value || "";
+                const normUser = normalizeText(rawUser);
+                const isCorrect = q.accepted.some(ans => normalizeText(ans) === normUser);
+                if (isCorrect) score1 += 0.25;
+
+                t1ReviewHTML += `
+                    <div class="p-3.5 rounded-2xl border ${isCorrect ? 'bg-emerald-50/60 border-emerald-200' : 'bg-rose-50/50 border-rose-200'} text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <span class="font-bold">${q.id}.</span> ${q.before} <strong class="underline">${rawUser || '—'}</strong> ${q.after}
+                            <div class="text-xs text-calm-muted mt-0.5">Пояснення: ${q.note}</div>
+                        </div>
+                        <div class="shrink-0 text-right">
+                            ${isCorrect
+                                ? `<span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 font-bold text-xs">✓ +0.25 б</span>`
+                                : `<span class="px-2.5 py-1 rounded-lg bg-white text-rose-800 border border-rose-200 font-semibold text-xs">Ключ: ${q.canonical}</span>`
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+            t1ReviewHTML += `</div>`;
+            reviewBlocks.push(t1ReviewHTML);
+
+            // --- Evaluate Task 2 (Reported Speech: 3 x 0.5 = 1.5) ---
+            let t2ReviewHTML = `<div class="space-y-2.5"><h4 class="font-display font-bold text-base text-calm-kseNavy">Завдання 2. Reported Speech (Непряма мова)</h4>`;
+            v.task2.forEach(q => {
+                const rawUser = document.getElementById(`t2_q${q.id}`)?.value || "";
+                let normUser = normalizeText(rawUser);
+                // Strip leading prefix if student repeated it
+                const normPrefix = normalizeText(q.prefix.replace("(that)", ""));
+                if (normUser.startsWith(normPrefix)) {
+                    normUser = normUser.slice(normPrefix.length).trim();
+                }
+                if (normUser.startsWith("that ")) {
+                    normUser = normUser.slice(5).trim();
+                }
+
+                const exactMatch = q.acceptedFull.some(ans => normalizeText(ans) === normUser);
+                // Check key tokens for partial or flexible match
+                let tokenMatches = 0;
+                q.keyTokens.forEach(group => {
+                    if (group.some(tok => normUser.includes(normalizeText(tok)))) {
+                        tokenMatches++;
+                    }
+                });
+
+                let pts = 0;
+                if (exactMatch || tokenMatches === q.keyTokens.length) {
+                    pts = 0.5;
+                } else if (tokenMatches >= 1) {
+                    pts = 0.25;
+                }
+                score2 += pts;
+
+                t2ReviewHTML += `
+                    <div class="p-3.5 rounded-2xl border ${pts === 0.5 ? 'bg-emerald-50/60 border-emerald-200' : pts === 0.25 ? 'bg-amber-50/70 border-amber-200' : 'bg-rose-50/50 border-rose-200'} text-xs sm:text-sm space-y-1.5">
+                        <div class="font-medium text-calm-muted">${q.id}. ${q.direct}</div>
+                        <div>Твоя відповідь: <span class="font-semibold text-calm-kseNavy">${q.prefix} ${rawUser || '—'}</span></div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                            <span class="text-xs text-emerald-900 font-semibold">Еталонний ключ: ${q.prefix} ${q.canonical}</span>
+                            <span class="px-2.5 py-1 rounded-lg ${pts > 0 ? 'bg-emerald-100 text-emerald-900' : 'bg-white text-rose-800 border border-rose-200'} font-bold text-xs">
+                                ${pts === 0.5 ? '✓ +0.50 б' : pts === 0.25 ? '≈ +0.25 б (частково)' : '0.00 б'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+            t2ReviewHTML += `</div>`;
+            reviewBlocks.push(t2ReviewHTML);
+
+            // --- Evaluate Task 3 (Vocabulary in Context: 6 x 0.25 = 1.5) ---
+            let t3ReviewHTML = `<div class="space-y-2.5"><h4 class="font-display font-bold text-base text-calm-kseNavy">Завдання 3. Vocabulary in Context (Слова в тексті)</h4><div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">`;
+            v.task3Answers.forEach((correctWord, idx) => {
+                const qNum = idx + 1;
+                const userChoice = document.getElementById(`t3_q${qNum}`)?.value || "";
+                const isCorrect = normalizeText(userChoice) === normalizeText(correctWord);
+                if (isCorrect) score3 += 0.25;
+
+                t3ReviewHTML += `
+                    <div class="p-3 rounded-2xl border ${isCorrect ? 'bg-emerald-50/60 border-emerald-200' : 'bg-rose-50/50 border-rose-200'} text-xs sm:text-sm flex items-center justify-between gap-2">
+                        <div>
+                            <span class="font-bold">(${qNum})</span> Твій вибір: <strong>${userChoice || '—'}</strong>
+                            ${!isCorrect ? `<div class="text-xs text-emerald-900 font-semibold mt-0.5">Правильно: ${correctWord}</div>` : ''}
+                        </div>
+                        <span class="px-2 py-0.5 rounded-lg ${isCorrect ? 'bg-emerald-100 text-emerald-900' : 'bg-white text-rose-800'} font-bold text-xs">
+                            ${isCorrect ? '+0.25 б' : '0 б'}
+                        </span>
+                    </div>
+                `;
+            });
+            t3ReviewHTML += `</div></div>`;
+            reviewBlocks.push(t3ReviewHTML);
+
+            // --- Evaluate Task 4 (Word by Definition: 6 x 0.25 = 1.5) ---
+            let t4ReviewHTML = `<div class="space-y-2.5"><h4 class="font-display font-bold text-base text-calm-kseNavy">Завдання 4. Word by Definition (Слово за визначенням)</h4>`;
+            v.task4.forEach(q => {
+                const rawUser = document.getElementById(`t4_q${q.id}`)?.value || "";
+                const normUser = normalizeText(rawUser).replace(/-/g, " ");
+                const isCorrect = q.accepted.some(ans => normalizeText(ans).replace(/-/g, " ") === normUser);
+                if (isCorrect) score4 += 0.25;
+
+                t4ReviewHTML += `
+                    <div class="p-3.5 rounded-2xl border ${isCorrect ? 'bg-emerald-50/60 border-emerald-200' : 'bg-rose-50/50 border-rose-200'} text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <span class="font-bold">${q.id}. [${q.letter}]</span> ${q.def}
+                            <div class="mt-0.5">Твоя відповідь: <strong>${rawUser || '—'}</strong></div>
+                        </div>
+                        <div class="shrink-0">
+                            ${isCorrect
+                                ? `<span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 font-bold text-xs">✓ +0.25 б (${q.canonical})</span>`
+                                : `<span class="px-2.5 py-1 rounded-lg bg-white text-rose-800 border border-rose-200 font-semibold text-xs">Ключ: ${q.canonical}</span>`
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+            t4ReviewHTML += `</div>`;
+            reviewBlocks.push(t4ReviewHTML);
+
+            // Total Calculation
+            const totalScore = score1 + score2 + score3 + score4;
+            const spentSeconds = totalTimeSeconds - Math.max(0, remainingSeconds);
+            const spentMins = Math.floor(spentSeconds / 60);
+            const spentSecs = spentSeconds % 60;
+
+            // Populate Results View
+            document.getElementById("scoreTask1").textContent = score1.toFixed(2);
+            document.getElementById("scoreTask2").textContent = score2.toFixed(2);
+            document.getElementById("scoreTask3").textContent = score3.toFixed(2);
+            document.getElementById("scoreTask4").textContent = score4.toFixed(2);
+            document.getElementById("totalScoreDisplay").textContent = totalScore.toFixed(2);
+
+            const pct = Math.round((totalScore / 6.0) * 100);
+            document.getElementById("totalPercentBadge").textContent = `${pct}% правильних відповідей`;
+            document.getElementById("resultMetaInfo").innerHTML = `
+                <div>Варіант: <strong>${v.shortBadge}</strong></div>
+                <div>Час роботи: <strong>${String(spentMins).padStart(2, '0')} хв ${String(spentSecs).padStart(2, '0')} с</strong> із 20:00</div>
+            `;
+
+            const autoNotice = document.getElementById("autoClosedNotice");
+            if (reason === 'timeout') {
+                autoNotice.classList.remove("hidden");
+                document.getElementById("resultCompletionBadge").textContent = "⏰ Автоматичне закриття після 20:00";
+            } else {
+                autoNotice.classList.add("hidden");
+                document.getElementById("resultCompletionBadge").textContent = "🎉 Тест завершено достроково";
+            }
+
+            // Psychological encouragement based on score
+            const headlineEl = document.getElementById("resultHeadline");
+            const msgEl = document.getElementById("resultMascotMessage");
+            if (totalScore >= 5.0) {
+                headlineEl.textContent = "Блискучий результат! Ти чудово володієш матеріалом B2 🌟";
+                msgEl.textContent = "Кепчик у захваті: твоя спокійна концентрація дала чудовий результат. Ти повністю готовий(-а) до будь-яких завдань із Passive Voice, Reported Speech та ділової лексики!";
+            } else if (totalScore >= 3.5) {
+                headlineEl.textContent = "Хороша база! Ти вже знаєш більшу частину матеріалу 🌿";
+                msgEl.textContent = "Кепчик обіймає тебе: у тебе міцний фундамент, а кілька дрібних помилок у формах дієслів зараз легко розібрати за ключем нижче без жодного стресу.";
+            } else {
+                headlineEl.textContent = "Дякую за чесну практику! Це твій безпечний крок до прогресу 💙";
+                msgEl.textContent = "Кепчик нагадує: нейропластичність працює найкраще саме тоді, коли ми бачимо правильні відповіді після спроби. Переглянь ключі нижче та зазирни у вкладку з флеш-картками!";
+            }
+
+            document.getElementById("detailedReviewContainer").innerHTML = reviewBlocks.join("");
+
+            // Show Results View
+            document.getElementById("viewActiveTest").classList.add("hidden");
+            document.getElementById("viewHome").classList.add("hidden");
+            document.getElementById("viewResults").classList.remove("hidden");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function returnToHomeForRetry() {
+            document.getElementById("viewResults").classList.add("hidden");
+            document.getElementById("viewActiveTest").classList.add("hidden");
+            document.getElementById("viewHome").classList.remove("hidden");
+            switchMainTab('setup');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function copyResultSummary() {
+            const student = document.getElementById("activeStudentBadge").textContent;
+            const variant = document.getElementById("activeVariantBadge").textContent;
+            const total = document.getElementById("totalScoreDisplay").textContent;
+            const s1 = document.getElementById("scoreTask1").textContent;
+            const s2 = document.getElementById("scoreTask2").textContent;
+            const s3 = document.getElementById("scoreTask3").textContent;
+            const s4 = document.getElementById("scoreTask4").textContent;
+
+            const summaryText = `KSE CalmTest B2 — Результат\nСтудент: ${student}\n${variant}\nЗагальний бал: ${total} / 6.0\n- Task 1 (Passive Voice): ${s1} / 1.5\n- Task 2 (Reported Speech): ${s2} / 1.5\n- Task 3 (Vocabulary): ${s3} / 1.5\n- Task 4 (Definitions): ${s4} / 1.5`;
+
+            const tempArea = document.createElement("textarea");
+            tempArea.value = summaryText;
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempArea);
+
+            showToast("Звіт скопійовано у буфер обміну! 📋", "✅");
+        }
+
+        // ============================================================================
+        // 8. BREATHING EXERCISE & CALM WEB AUDIO SOUNDSCAPE
+        // ============================================================================
+        function openBreathingModal() {
+            const modal = document.getElementById("breathingModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+
+            const circle = document.getElementById("breathingVisualCircle");
+            const phaseText = document.getElementById("breathingPhaseText");
+            const countText = document.getElementById("breathingTimerCount");
+
+            const phases = [
+                { label: "Вдихни...", scale: "scale(1.32)", bg: "#D1FAE5" },
+                { label: "Затримай...", scale: "scale(1.32)", bg: "#E0F2FE" },
+                { label: "Повільний видих...", scale: "scale(1.0)", bg: "#ECFDF5" }
+            ];
+            let phaseIdx = 0;
+            let secLeft = 4;
+
+            function updateBreathStep() {
+                const p = phases[phaseIdx];
+                phaseText.textContent = p.label;
+                circle.style.transform = p.scale;
+                circle.style.backgroundColor = p.bg;
+                countText.textContent = `${secLeft} с`;
+            }
+
+            updateBreathStep();
+            clearInterval(breathingInterval);
+            breathingInterval = setInterval(() => {
+                secLeft--;
+                if (secLeft <= 0) {
+                    phaseIdx = (phaseIdx + 1) % phases.length;
+                    secLeft = 4;
+                }
+                updateBreathStep();
+            }, 1000);
+        }
+
+        function closeBreathingModal() {
+            const modal = document.getElementById("breathingModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+            clearInterval(breathingInterval);
+        }
+
+        function toggleAmbientSound() {
+            const iconEl = document.getElementById("ambientSoundIcon");
+            const labelEl = document.getElementById("ambientSoundLabel");
+
+            if (!ambientPlaying) {
+                try {
+                    if (!audioCtx) {
+                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (audioCtx.state === 'suspended') {
+                        audioCtx.resume();
+                    }
+
+                    // Create a warm, ultra-soft harmonic chord (432Hz & 528Hz gentle sine waves)
+                    ambientGainNode = audioCtx.createGain();
+                    ambientGainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
+                    ambientGainNode.gain.exponentialRampToValueAtTime(0.035, audioCtx.currentTime + 1.5);
+                    ambientGainNode.connect(audioCtx.destination);
+
+                    const freqs = [216, 324, 432];
+                    window.ambientOscs = freqs.map(f => {
+                        const osc = audioCtx.createOscillator();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+                        osc.connect(ambientGainNode);
+                        osc.start();
+                        return osc;
+                    });
+
+                    ambientPlaying = true;
+                    iconEl.textContent = "🔊";
+                    labelEl.textContent = "Спокій увімкнено";
+                    showToast("Увімкнено м'який гармонійний фон для концентрації 🎶", "🌿");
+                } catch (e) {
+                    showToast("Аудіо недоступне у цьому браузері", "🔇");
+                }
+            } else {
+                if (ambientGainNode && audioCtx) {
+                    ambientGainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+                    setTimeout(() => {
+                        if (window.ambientOscs) {
+                            window.ambientOscs.forEach(o => { try { o.stop(); } catch (err) {} });
+                        }
+                    }, 550);
+                }
+                ambientPlaying = false;
+                iconEl.textContent = "🔇";
+                labelEl.textContent = "Фоновий спокій";
+            }
+        }
+    </script>
+</body>
+</html>
